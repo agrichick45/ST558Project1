@@ -8,3 +8,172 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+
+# Required Packages
+
+```{r}
+#load the required packages
+require("httr")
+require("jsonlite")
+require("tidyverse")
+require("RCurl")
+require("ggplot2")
+```
+# Function Creation
+## Create A Function by Primary and Secondary Pokemon Type
+
+There are 18 different types of pokemon. These 18 types apply to both Pokémon and their moves. It is possible for pokemon to have two different types, but they usually have a primary type. This initital function was created to help the user figure out which type they would like to specify. 
+
+```{r}
+types <- function(type){
+  ###
+  # This functions returns a data.frame with the numeric key and the name of the types        #associated with pokemon. It can also return the data for a single type if a type ID        #number or name is passed.
+  ###
+  
+  # Get the overall type from the type endpoint, allowing a user specified type.
+  baseURL<-"https://pokeapi.co/api/v2/type/"
+  typeData <- RCurl::getURL(baseURL)
+  typeDataDF<-jsonlite::fromJSON(typeData)
+  
+  # Select and create the type data.frame from the results.
+  output <-  typeDataDF$results
+  outputType <- data.frame(type=1:20, output)
+  
+  # If team does not equal "all", check if it is a valid pokemon type or numeric value.
+  if (type != "all"){
+    
+    # If team is in the id column, subset output for just that row.
+    if (type %in% outputType$type){
+      pokeType <- type
+      pokeTypeSpec <-GET(paste0(baseURL,pokeType))
+      pokeTypeparsed <- pokeTypeSpec$content %>% rawToChar() %>% fromJSON()
+      typeParseRes<-pokeTypeparsed$pokemon
+      pokePrimary<-purrr::map(typeParseRes$pokemon$url, jsonlite::fromJSON)
+      return(pokePrimary)
+    }
+    # If team is in the fullName column, subset output for just that row.
+    if (type %in% outputType$name){
+      pokeType <- type
+      pokeTypeSpec <-GET(paste0(baseURL,pokeType))
+      pokeTypeparsed <- pokeTypeSpec$content %>% rawToChar() %>% fromJSON()
+      typeParseRes<-pokeTypeparsed$pokemon
+      pokePrimary<-purrr::map(typeParseRes$pokemon$url, jsonlite::fromJSON)
+      return(pokePrimary)
+    }
+    # Otherwise, throw an informative error.
+    else {
+    message <- paste("ERROR: The numeric Index of Pokemon Type, or Pokemon Type is not clear.",
+                    "Select from the menu above, of try type('all') to find the Pokemon Type you're looking for.")
+    print(outputType[1:2])
+    stop(message)
+    
+    }
+   }
+  #else {
+    
+  }
+
+```
+
+
+```{r}
+#This function was originally designed to take the input from the type function, and process and clean it to the final output. However, I had to change this due to processing speed of the API querying. It took 15 minutesor more  to run this process. To expedite the process, running the user specified type through the function to get the list, which is then fed into the type processing frame as "Frame"
+typeChoice<-types('fire')
+
+typeFrame<-function(frame, index){
+  pokeid<-frame[[index]]$id
+  pokeName<-frame[[index]]$name
+  pokeHeight<-frame[[index]]$height
+  pokeWeight<-frame[[index]]$weight
+  pokeType1<-frame[[index]]$types$type$name[1]
+  pokeType2<-frame[[index]]$types$type$name[2]
+  stats<-t(frame[[index]][["stats"]][1])
+  pokeFinal<-as.data.frame(cbind(pokeid, pokeName, pokeHeight, pokeWeight, pokeType1,     pokeType2, stats))
+  return(pokeFinal)
+}
+
+```
+
+```{r}
+typeChoice<-types('fire')
+listLen<-length(typeChoice)
+numIndex<-1:listLen
+
+typeFrame(typeChoice, 3)
+
+finalFrame<-lapply(X = numIndex, FUN = typeFrame, frame = typeChoice)
+
+finalFrame<-do.call(rbind.data.frame, finalFrame)
+
+finalFrame$hp<-finalFrame$`1`
+finalFrame$hp<-as.numeric(finalFrame$hp)
+finalFrame$`1`<-NULL
+finalFrame$attack<-finalFrame$`2`
+finalFrame$attack<-as.numeric(finalFrame$attack)
+finalFrame$`2`<-NULL
+finalFrame$defense<-finalFrame$`3`
+finalFrame$defense<-as.numeric(finalFrame$defense)
+finalFrame$`3`<-NULL
+finalFrame$specialattack<-finalFrame$`4`
+finalFrame$specialattack<-as.numeric(finalFrame$specialattack)
+finalFrame$`4`<-NULL
+finalFrame$specialdefense<-finalFrame$`5`
+finalFrame$specialdefense<-as.numeric(finalFrame$specialdefense)
+finalFrame$`5`<-NULL
+finalFrame$speed<-finalFrame$`6`
+finalFrame$speed<-as.numeric(finalFrame$speed)
+finalFrame$`6`<-NULL
+finalFrame$pokeHeight<-as.numeric(finalFrame$pokeHeight)
+finalFrame$pokeWeight<-as.numeric(finalFrame$pokeWeight)
+
+```
+
+
+
+# Frustrated Workarounds
+
+I am not 100% sure how to set up a multiple request API to do what I needed to do, therefore, I am continuing with the assignment using the pokemon CSV file that can be found on GitHub. This will, hopefully be linked back up again with the dataframe created via the API.
+```{r}
+#set the working directory
+setwd("C:/Users/19208/Documents/github/ST558Project1")
+
+#read in the csv file
+pokeCSV<-read.csv("pokemon1.csv")
+
+```
+
+##Creating a Contingency Table by Type and Generation
+```{r}
+#First, we look only at the primary pokemon type. 
+typeGen<-table(pokeCSV$Type1, pokeCSV$Generation)
+
+typeGenDF<-as.data.frame(typeGen)
+#But, because Pokemon have multiple types, we need to create a new variable with both of the different types together into a new character variable. 
+
+pokeCSV$CombinedType<-ifelse(pokeCSV$Type2=="", pokeCSV$Type1, paste(pokeCSV$Type1,pokeCSV$Type2, sep='/'))
+
+#Create a contingency plot of the combination types.
+
+comboTable<-table(pokeCSV$CombinedType, pokeCSV$Generation)
+
+#this creates the count variables of both pokemon types over generations. 
+groupTable<-table(pokeCSV$Type1, pokeCSV$Type2, pokeCSV$Generation)
+
+```
+
+Overall, there are nearly 200 unique combinations of pokemon types. So, looking only at primary type is the best option. 
+
+```{r}
+baseURL<-"https://pokeapi.co/api/v2/type/"
+typeData <- RCurl::getURL(baseURL)
+typeDataDF<-jsonlite::fromJSON(typeData)
+
+output <-  typeDataDF$results
+outputType <- data.frame(type=1:20, output)
+
+allTypes<-outputType$name[1:3]
+
+allFrame<-lapply(X = allTypes, FUN = types)
+
+```
+
