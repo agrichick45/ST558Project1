@@ -1,30 +1,95 @@
----
-title: "ST558Project"
-author: "Mandy Liesch"
-date: "10/2/2021"
-output: github_document
----
+ST558Project
+================
+Mandy Liesch
+10/2/2021
 
-#```{r, include=FALSE}
-#knitr::opts_chunk$set(echo = TRUE)
-#```
+-   [Required Packages](#required-packages)
+-   [Function Creation](#function-creation)
+    -   [Type Fuction](#type-fuction)
+    -   [Type Cleaning Function](#type-cleaning-function)
+-   [Data Preparation](#data-preparation)
+    -   [Filling in and Cleaning the typeCleaning
+        Function](#filling-in-and-cleaning-the-typecleaning-function)
+
+\#`{r, include=FALSE} #knitr::opts_chunk$set(echo = TRUE) #`
 
 # Required Packages
 
-```{r}
+``` r
 #load the required packages
 require("httr")
+```
+
+    ## Loading required package: httr
+
+    ## Warning: package 'httr' was built under R version 4.1.1
+
+``` r
 require("jsonlite")
+```
+
+    ## Loading required package: jsonlite
+
+``` r
 require("tidyverse")
+```
+
+    ## Loading required package: tidyverse
+
+    ## Warning: package 'tidyverse' was built under R version 4.1.1
+
+    ## -- Attaching packages ------------------------------------------------------- tidyverse 1.3.1 --
+
+    ## v ggplot2 3.3.5     v purrr   0.3.4
+    ## v tibble  3.1.4     v dplyr   1.0.7
+    ## v tidyr   1.1.3     v stringr 1.4.0
+    ## v readr   2.0.1     v forcats 0.5.1
+
+    ## Warning: package 'ggplot2' was built under R version 4.1.1
+
+    ## Warning: package 'tibble' was built under R version 4.1.1
+
+    ## Warning: package 'readr' was built under R version 4.1.1
+
+    ## -- Conflicts ---------------------------------------------------------- tidyverse_conflicts() --
+    ## x dplyr::filter()  masks stats::filter()
+    ## x purrr::flatten() masks jsonlite::flatten()
+    ## x dplyr::lag()     masks stats::lag()
+
+``` r
 require("RCurl")
+```
+
+    ## Loading required package: RCurl
+
+    ## Warning: package 'RCurl' was built under R version 4.1.1
+
+    ## 
+    ## Attaching package: 'RCurl'
+
+    ## The following object is masked from 'package:tidyr':
+    ## 
+    ##     complete
+
+``` r
 require("ggplot2")
 library(usethis)
+```
+
+    ## Warning: package 'usethis' was built under R version 4.1.1
+
+``` r
 library(knitr)
 library(rmarkdown)
+```
+
+    ## Warning: package 'rmarkdown' was built under R version 4.1.1
+
+``` r
 use_git_config(user.name="Mandy Liesch", user.email="amliesch@ncsu.edu")
 ```
 
-```{r, eval=FALSE}
+``` r
 #code to create the rendering
 rmarkdown::render("ST558Projecct1.Rmd", 
                   output_format = "github_document", 
@@ -32,12 +97,18 @@ rmarkdown::render("ST558Projecct1.Rmd",
 ```
 
 # Function Creation
+
 ## Type Fuction
+
 ### Determining Primary and Secondary Pokemon Type
 
-There are 18 different types of pokemon. These 18 types apply to both Pokémon and their moves. It is possible for pokemon to have two different types, but they usually have a primary type. This initital function was created to help the user figure out which type they would like to specify. 
+There are 18 different types of pokemon. These 18 types apply to both
+Pokémon and their moves. It is possible for pokemon to have two
+different types, but they usually have a primary type. This initital
+function was created to help the user figure out which type they would
+like to specify.
 
-```{r}
+``` r
 #Return all the pokemon names and their informative urls into a dataframe 
 
 
@@ -49,28 +120,20 @@ allPoke<-function(){
   pokeData1<-purrr::map(output$url, jsonlite::fromJSON)
   return(pokeData1)
 }
-
 ```
 
-```{r}
+allPokeURL&lt;-“<https://pokeapi.co/api/v2/pokemon?limit=1500>” pokeData
+&lt;- RCurl::getURL(allPokeURL)
+pokeDataDF&lt;-jsonlite::fromJSON(pokeData) output &lt;-
+pokeDataDF*r**e**s**u**l**t**s**p**o**k**e**D**a**t**a* &lt;  − *p**u**r**r**r* :  : *m**a**p*(*o**u**t**p**u**t*url,
+jsonlite::fromJSON)
 
-```
+pokeName&lt;-frame\[\[index\]\]*n**a**m**e**p**o**k**e**H**e**i**g**h**t* &lt;  − *f**r**a**m**e*\[\[*i**n**d**e**x*\]\]height
+pokeWeight&lt;-frame\[\[index\]\]*w**e**i**g**h**t**p**o**k**e**T**y**p**e*1 &lt;  − *f**r**a**m**e*\[\[*i**n**d**e**x*\]\]types*t**y**p**e*name\[1\]
+pokeType2&lt;-frame\[\[index\]\]*t**y**p**e**s*type$name\[2\]
+stats&lt;-t(frame\[\[index\]\]\[\[“stats”\]\]\[1\])
 
-allPokeURL<-"https://pokeapi.co/api/v2/pokemon?limit=1500"
-pokeData <- RCurl::getURL(allPokeURL)
-pokeDataDF<-jsonlite::fromJSON(pokeData)
-output <- pokeDataDF$results
-pokeData<-purrr::map(output$url, jsonlite::fromJSON)
-
-pokeName<-frame[[index]]$name
-pokeHeight<-frame[[index]]$height
-pokeWeight<-frame[[index]]$weight
-pokeType1<-frame[[index]]$types$type$name[1]
-pokeType2<-frame[[index]]$types$type$name[2]
-stats<-t(frame[[index]][["stats"]][1])
-
-
-```{r}
+``` r
 types <- function(type){
   ###
   # This functions returns a data.frame with the numeric key and the name of the types        #associated with pokemon. It can also return the data for a single type if a type ID        #number or name is passed.
@@ -120,14 +183,9 @@ types <- function(type){
   return(pokePrimary)
   }
 }
-
 ```
 
-
-
-
-
-```{r}
+``` r
 genOut <- function(generation){
   ###
   # This functions returns a data.frame with the numeric key and the name of the types        #associated with pokemon. It can also return the data for a single type if a type ID        #number or name is passed.
@@ -174,14 +232,22 @@ genOut <- function(generation){
   #else {
     
   }
-
 ```
+
 ## Type Cleaning Function
+
 ### Using the API to read the urls to Populate the Data Frame
 
-This function was originally designed to take the input from the type function, and process and clean it to the final output. However, I had to change this due to processing speed of the API querying. It took 15 minutes or more  to run this process. To expedite the process, running the user specified type through the function to get the list, which is then fed into the type processing frame as "Frame". The code for the original function driven task is commented out, and replaces the first two lines. 
+This function was originally designed to take the input from the type
+function, and process and clean it to the final output. However, I had
+to change this due to processing speed of the API querying. It took 15
+minutes or more to run this process. To expedite the process, running
+the user specified type through the function to get the list, which is
+then fed into the type processing frame as “Frame”. The code for the
+original function driven task is commented out, and replaces the first
+two lines.
 
-```{r}
+``` r
 #typeFrame<-function(type, index){
 #  frame<-types(type)
 #typeAllFrames<-types('all')
@@ -199,10 +265,9 @@ typeFrame<-function(frame, index){
   pokeFinal<-as.data.frame(cbind(pokeid, pokeName, pokeHeight, pokeWeight, pokeType1,        pokeType2, stats))
   return(pokeFinal)
 }
-
 ```
 
-```{r}
+``` r
 #genChoice<-genOut(2)
 
 genFrame<-function(frame, index){
@@ -215,24 +280,21 @@ genFrame<-function(frame, index){
   pokeGenFinal<-as.data.frame(cbind(pokeid, pokeName, pokeGen, pokeGrowth, pokeHappy,     pokeCapture))
   return(pokeGenFinal)
 }
-
-
 ```
+
 # Data Preparation
 
 ## Filling in and Cleaning the typeCleaning Function
 
-```{r eval=FALSE}
+``` r
 listLen<-length(typeAllFrames)
 numIndex<-1:listLen
 
 finalTypeFrame<-lapply(X = numIndex, FUN = typeFrame, frame= typeAllFrames)
 finalFrame<-do.call(rbind.data.frame, finalTypeFrame)
-
-
 ```
 
-```{r}
+``` r
 cleanFrame<-function(lapplyFrame){
   lapplyFrame$hp<-lapplyFrame$`1`
   lapplyFrame$hp<-as.numeric(lapplyFrame$hp)
@@ -257,12 +319,9 @@ cleanFrame<-function(lapplyFrame){
   lapplyFrame$pokeid<-as.numeric(lapplyFrame$pokeid)
   return(lapplyFrame)
 }  
-
-
 ```
 
-```{r eval=FALSE}
-
+``` r
 listGenLen<-length(genChoice)
 numGenIndex<-1:listGenLen
 
@@ -273,10 +332,9 @@ finalGenFrame<-do.call(rbind.data.frame, finalFrame)
 finalGenFrame$pokeid<-as.numeric(finalGenFrame$pokeid)
 finalGenFrame$pokeHappy<-as.numeric(finalGenFrame$pokeHappy)
 finalGenFrame$pokeCapture<-as.numeric(finalGenFrame$pokeCapture)
-
 ```
 
-```{r eval=FALSE}
+``` r
 gen3Fire<-merge(finalFrame, finalGenFrame, by=c('pokeid','pokeName'))
 tables<-cleanFrame(finalFrame)
 tables<-as_tibble(tables)
