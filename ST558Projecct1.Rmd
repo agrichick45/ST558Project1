@@ -455,22 +455,67 @@ plot2
 
 ```
 
+Now, we need to look at the overall statistics a pokemon has. This is done by summing all of the attack, defense, speed, and hitpoints
 
-
-```{r eval=FALSE}
-
-mergedFF<- mergedFF %>%
+```{r}
+plotFF<- plotFF %>%
   mutate(SUM = rowSums(.[7:12]))
 
-mergedFF<- mergedFF %>%
+plotFF<- plotFF %>%
   mutate(SumAttack = attack + specialattack)
 
-mergedFF<- mergedFF %>%
-  mutate(PerAtt = SumAttack/SUM*100)
+```
 
+Now, in most societies, power tends to be a good thing. And in pokemon, the overall total sum of all of the statistics shows how much power and value a pokemon has. Even though fat pokemon tend to have more power, overall, it appears this level of power really weighs on their mind. The colored circles represent the attack power, and the heavier a pokemon is, the more power it has. 
+
+
+```{r}
+plot3 <- ggplot(plotFF, aes(SUM,
+                               pokeWeight,
+                color=SumAttack)) +
+  # Add a scatter plot layer and adjust the size and opaqueness of points.
+  geom_point(size=3, alpha=0.75) + 
+  # Add a color gradient for winPercentage.
+  scale_color_gradient(low="blue", high="red") +
+  # Remove the legend.
+  theme(legend.position="none") + 
+  # Add a black regression line.
+  geom_smooth(method=lm, formula=y~x, color="black") + 
+  # Add labels to the axes.
+  scale_x_continuous("Sum of All Power Stats") + 
+  scale_y_continuous("Pokemon Weight") + 
+  # Add a title.
+  ggtitle("Heavy Pokemon are More Powerful, Especially in Attack Power (Redder)")
+
+plot3
+```
+
+Like in people, big people know they are being used to lift heavy stuff, and pull tall objects off the shelf. These high attack power and higher stat pokemon are likely used in Poke-national defense, and super hard, manual labor jobs, so the fact that heavier pokemon tend to be less happy makes sense. Power is a heavy responsibility and weight these heavy pokemon disproportionately wear.
+
+## Pokemon getting Heavier Over Time
+
+So, we have data over multiple generations, showing the avereage weight of pokemon over time. This data can be summerized into categories and shown in a table. 
+
+```{r}
+#creating a function to summerize pokemon weight by generation
+breakdown <- plotFF %>%
+ group_by(pokeGen) %>%
+ summarise(Weight = mean(pokeWeight))
+
+breakdown1 <- plotFF %>%
+  group_by(pokeGen) %>%
+  summarise(Happiness = mean(pokeHappy))
+
+fullbreak<-merge(breakdown, breakdown1, by='pokeGen')
 
 
 ```
 
+It appears that, like American Society, pokemon are getting heavier and sadder over time as well, peaking in generation  7, with sadness continuing to decline over time substatially. Generation 4 was both fat, and happy, but the wear of Pokesociety is starting to get to the newer pokemon.  
 
-
+```{r}
+knitr::kable(
+  fullbreak,
+  caption=paste("Pokemon Weight and Happiness over Generations")
+)
+```

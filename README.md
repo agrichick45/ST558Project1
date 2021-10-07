@@ -26,6 +26,8 @@ Mandy Liesch
     -   [Preparation](#preparation)
         -   [Run the Functions](#run-the-functions)
     -   [Are Fat Pokemon Happy?](#are-fat-pokemon-happy)
+    -   [Pokemon getting Heavier Over
+        Time](#pokemon-getting-heavier-over-time)
 
 \#`{r, include=FALSE} #knitr::opts_chunk$set(echo = TRUE) #`
 
@@ -488,7 +490,7 @@ plot1 <- ggplot(plotFF, aes(BMI,
 plot1
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-31-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-17-1.png)<!-- -->
 
 It appears that there is a slight negative correlation to baseline
 happiness to BMI, however, it appears most pokemon are pretty happy,
@@ -517,15 +519,97 @@ plot2 <- ggplot(plotFF, aes(pokeWeight,
 plot2
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-32-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-18-1.png)<!-- -->
+
+Now, we need to look at the overall statistics a pokemon has. This is
+done by summing all of the attack, defense, speed, and hitpoints
 
 ``` r
-mergedFF<- mergedFF %>%
+plotFF<- plotFF %>%
   mutate(SUM = rowSums(.[7:12]))
 
-mergedFF<- mergedFF %>%
+plotFF<- plotFF %>%
   mutate(SumAttack = attack + specialattack)
-
-mergedFF<- mergedFF %>%
-  mutate(PerAtt = SumAttack/SUM*100)
 ```
+
+Now, in most societies, power tends to be a good thing. And in pokemon,
+the overall total sum of all of the statistics shows how much power and
+value a pokemon has. Even though fat pokemon tend to have more power,
+overall, it appears this level of power really weighs on their mind. The
+colored circles represent the attack power, and the heavier a pokemon
+is, the more power it has.
+
+``` r
+plot3 <- ggplot(plotFF, aes(SUM,
+                               pokeWeight,
+                color=SumAttack)) +
+  # Add a scatter plot layer and adjust the size and opaqueness of points.
+  geom_point(size=3, alpha=0.75) + 
+  # Add a color gradient for winPercentage.
+  scale_color_gradient(low="blue", high="red") +
+  # Remove the legend.
+  theme(legend.position="none") + 
+  # Add a black regression line.
+  geom_smooth(method=lm, formula=y~x, color="black") + 
+  # Add labels to the axes.
+  scale_x_continuous("Sum of All Power Stats") + 
+  scale_y_continuous("Pokemon Weight") + 
+  # Add a title.
+  ggtitle("Heavy Pokemon are More Powerful, Especially in Attack Power (Redder)")
+
+plot3
+```
+
+![](README_files/figure-gfm/unnamed-chunk-20-1.png)<!-- -->
+
+Like in people, big people know they are being used to lift heavy stuff,
+and pull tall objects off the shelf. These high attack power and higher
+stat pokemon are likely used in Poke-national defense, and super hard,
+manual labor jobs, so the fact that heavier pokemon tend to be less
+happy makes sense. Power is a heavy responsibility and weight these
+heavy pokemon disproportionately wear.
+
+## Pokemon getting Heavier Over Time
+
+So, we have data over multiple generations, showing the avereage weight
+of pokemon over time. This data can be summerized into categories and
+shown in a table.
+
+``` r
+#creating a function to summerize pokemon weight by generation
+breakdown <- plotFF %>%
+ group_by(pokeGen) %>%
+ summarise(Weight = mean(pokeWeight))
+
+breakdown1 <- plotFF %>%
+  group_by(pokeGen) %>%
+  summarise(Happiness = mean(pokeHappy))
+
+fullbreak<-merge(breakdown, breakdown1, by='pokeGen')
+```
+
+It appears that, like American Society, pokemon are getting heavier and
+sadder over time as well, peaking in generation 7, with sadness
+continuing to decline over time substatially. Generation 4 was both fat,
+and happy, but the wear of Pokesociety is starting to get to the newer
+pokemon.
+
+``` r
+knitr::kable(
+  fullbreak,
+  caption=paste("Pokemon Weight and Happiness over Generations")
+)
+```
+
+| pokeGen         |    Weight | Happiness |
+|:----------------|----------:|----------:|
+| generation-i    |  459.5166 |  69.73510 |
+| generation-ii   |  491.0500 |  66.10000 |
+| generation-iii  |  671.2463 |  62.42537 |
+| generation-iv   |  718.0865 |  68.36538 |
+| generation-v    |  524.6242 |  65.03356 |
+| generation-vi   |  532.6324 |  66.25000 |
+| generation-vii  | 1046.4512 |  51.21951 |
+| generation-viii |  747.6867 |  48.67470 |
+
+Pokemon Weight and Happiness over Generations
