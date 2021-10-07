@@ -25,6 +25,7 @@ Mandy Liesch
 -   [Data Analysis](#data-analysis)
     -   [Preparation](#preparation)
         -   [Run the Functions](#run-the-functions)
+    -   [Are Fat Pokemon Happy?](#are-fat-pokemon-happy)
 
 \#`{r, include=FALSE} #knitr::opts_chunk$set(echo = TRUE) #`
 
@@ -418,7 +419,8 @@ cleanGen<-function(genPrep){
 
 We have looked at the two main functions that are put together. In order
 to do final anlysis (in my case), we want to have the generations data
-set merged together with the
+set merged together with the pokemon dataset to get our final output
+creation.
 
 ``` r
 mergedFinal<-function(typePrep, genPrep){
@@ -444,39 +446,86 @@ genAllFrame<-genOut('all')
 mergedFF<-mergedFinal(typeAllFrame, genAllFrame)
 ```
 
+## Are Fat Pokemon Happy?
+
+The thousands of different pokemon have an ideal weight and type
+associated with their species. Poke-scientists have also studied the
+baseline level of happiness that come when a person first catches a
+pokemon. Some species are much happier than others. Does this correspond
+with the pokemons overall weight?
+
+To calculate the pokemon BMI, we need to use the dataframe we returned,
+and the mutate function to create a new variable called BMI. There is
+one miserable pokemon (Happiness of 0, with a BMI of nearly 10,000), so
+we filter out his data, as it is an outlier.
+
 ``` r
-tables<-as_tibble(mergedFF)
+mergedFF<- mergedFF %>%
+  mutate(BMI = pokeWeight/(pokeHeight*pokeHeight))
 
-tables<-tables[!is.na(tables$pokeType1),]
+plotFF<- mergedFF %>%
+  filter(BMI < 50)
+```
 
-bargraph<-tables %>%
-    mutate(SUM = rowSums(.[7:12])) %>%
-    group_by(pokeType1) %>%
-    summarise_at(vars(SUM), list(Average = mean))
+Then, we can plot the overall happiness of the pokemon, vs their BMI in
+ggplot2.
 
-plot1 <- ggplot(bargraph)
-  
+``` r
+plot1 <- ggplot(plotFF, aes(BMI,
+                               pokeHappy)) +
+  # Add a scatter plot layer and adjust the size and opaqueness of points.
+  geom_point(size=3, alpha=0.75) + 
+  # Remove the legend.
+  theme(legend.position="none") + 
+  # Add a black regression line.
+  geom_smooth(method=lm, formula=y~x, color="black") + 
+  # Add labels to the axes.
+  scale_x_continuous("Pokemon BMI") + 
+  scale_y_continuous("Pokemon Happiness Level") + 
+  # Add a title.
+  ggtitle("Baseline Pokemon Happiness and BMI")
 
-gen1Type<- tables %>%
-  count(pokeType1) %>%
-  mutate(Percentage=n/sum(n)*100)
+plot1
+```
 
-#knitr::kable(
-  #gen1Type,
-  #caption=paste("Pokemon Primary Type by Count and Percentage"), digits=2)
+![](README_files/figure-gfm/unnamed-chunk-31-1.png)<!-- -->
 
-gen2Type<- tables %>%
-  count(pokeType2) %>%
-  mutate(Percentage=n/sum(n)*100)
+It appears that there is a slight negative correlation to baseline
+happiness to BMI, however, it appears most pokemon are pretty happy,
+despite their BMI. However, as the following plot shows, even with the
+super high numbers filtered out, heavier pokemon still have a higher
+overall sadness level, despite their density. As a super dense, yet
+heavy human, and not a poke-scientist, I can only speculate that they
+have bodily wear and tear from using their body, repeatedly in fights,
+combined with the higher wear and tear of moving and feeding heavy mass.
 
-#knitr::kable(
-  #gen2Type,
-  #caption=paste("Pokemon Primary Type by Count and Percentage"), digits=2)
-  
-knitr::kable(list(gen1Type, gen2Type))
+``` r
+plot2 <- ggplot(plotFF, aes(pokeWeight,
+                               pokeHappy)) +
+  # Add a scatter plot layer and adjust the size and opaqueness of points.
+  geom_point(size=3, alpha=0.75) + 
+  # Remove the legend.
+  theme(legend.position="none") + 
+  # Add a black regression line.
+  geom_smooth(method=lm, formula=y~x, color="black") + 
+  # Add labels to the axes.
+  scale_x_continuous("Pokemon Weight") + 
+  scale_y_continuous("Overall Pokemon Happiness") + 
+  # Add a title.
+  ggtitle("Fat Pokemon are Less Happy")
 
+plot2
+```
 
-hist2 <- tables %>%
-  group_by(pokeType2) %>%
-  summarise(Freq=n())
+![](README_files/figure-gfm/unnamed-chunk-32-1.png)<!-- -->
+
+``` r
+mergedFF<- mergedFF %>%
+  mutate(SUM = rowSums(.[7:12]))
+
+mergedFF<- mergedFF %>%
+  mutate(SumAttack = attack + specialattack)
+
+mergedFF<- mergedFF %>%
+  mutate(PerAtt = SumAttack/SUM*100)
 ```
