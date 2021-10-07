@@ -1,17 +1,36 @@
----
-title: "ST558Project"
-author: "Mandy Liesch"
-date: "10/2/2021"
-output: github_document
----
+ST558Project
+================
+Mandy Liesch
+10/2/2021
 
-#```{r, include=FALSE}
-#knitr::opts_chunk$set(echo = TRUE)
-#```
+-   [Required Packages](#required-packages)
+-   [Function Creation](#function-creation)
+    -   [Type Fuctions](#type-fuctions)
+        -   [allPoke(): Returns ALL
+            Pokemon](#allpoke-returns-all-pokemon)
+        -   [types(): User Defined Type](#types-user-defined-type)
+        -   [typeFrame(): Returning Several
+            Columns](#typeframe-returning-several-columns)
+        -   [listPrep(): Creating the Complete
+            Dataframe](#listprep-creating-the-complete-dataframe)
+        -   [cleanFrame(): Processing the Type Data into
+            Columns](#cleanframe-processing-the-type-data-into-columns)
+    -   [Generation Functions](#generation-functions)
+        -   [allGen(): Returns All Generations of
+            Pokemon](#allgen-returns-all-generations-of-pokemon)
+        -   [genOut() Function](#genout-function)
+        -   [genFrame(): Returning a Single Row of Generations
+            Column](#genframe-returning-a-single-row-of-generations-column)
+    -   [Merging Functions](#merging-functions)
+-   [Data Analysis](#data-analysis)
+    -   [Preparation](#preparation)
+        -   [Run the Functions](#run-the-functions)
+
+\#`{r, include=FALSE} #knitr::opts_chunk$set(echo = TRUE) #`
 
 # Required Packages
 
-```{r}
+``` r
 #load the required packages
 require("httr")
 require("jsonlite")
@@ -24,7 +43,7 @@ library(rmarkdown)
 use_git_config(user.name="Mandy Liesch", user.email="amliesch@ncsu.edu")
 ```
 
-```{r, eval=FALSE}
+``` r
 #code to create the rendering
 rmarkdown::render("ST558Projecct1.Rmd", 
                   output_format = "github_document", 
@@ -33,13 +52,19 @@ rmarkdown::render("ST558Projecct1.Rmd",
 ```
 
 # Function Creation
+
 ## Type Fuctions
 
 ### allPoke(): Returns ALL Pokemon
 
-There are 18 different types of Pokemon. These 18 types apply to both Pokémon and their moves. It is possible for Pokemon to have two different types, but they usually have a primary type. This initial function was created to help the user figure out which type they would like to specify. There are several functions necessary to create the output by type. 
+There are 18 different types of Pokemon. These 18 types apply to both
+Pokémon and their moves. It is possible for Pokemon to have two
+different types, but they usually have a primary type. This initial
+function was created to help the user figure out which type they would
+like to specify. There are several functions necessary to create the
+output by type.
 
-```{r}
+``` r
 #Return all the pokemon names and their informative urls into a dataframe. 
 allPoke<-function(){
   #Connect to the Pokemon endpoint, using a limit to make sure all are returned.
@@ -55,14 +80,19 @@ allPoke<-function(){
   #Return this list when the function is called. 
   return(pokeData1)
 }
-
 ```
 
 ### types(): User Defined Type
 
-This function utilizes the Type endpoint to return the information of a type that the user specifies. It has many different layers, and allows the user to input a number from 1-20, that corresponds to a pokemon type, OR a type character string, like 'fire'. If 'all' is specified, a list is returned with all pokemon, from the allPoke() function, listed previously. If an incorrect string or number is put in, a list is returned of appropriate options in Pokemon type.
+This function utilizes the Type endpoint to return the information of a
+type that the user specifies. It has many different layers, and allows
+the user to input a number from 1-20, that corresponds to a pokemon
+type, OR a type character string, like ‘fire’. If ‘all’ is specified, a
+list is returned with all pokemon, from the allPoke() function, listed
+previously. If an incorrect string or number is put in, a list is
+returned of appropriate options in Pokemon type.
 
-```{r}
+``` r
 types <- function(type){
   ###
   # This functions returns a data.frame with the numeric key and the name of the types      # associated with pokemon. It can also return the data for a single type if a type ID     # number or name is passed.
@@ -121,21 +151,26 @@ types <- function(type){
   return(pokePrimary)
   }
 }
-
 ```
-
 
 ### typeFrame(): Returning Several Columns
 
-The list function dataset is very complex. This nested function turns the user specified type list into the dataframe that we desire. The index value is a numerical input that is used to return the function. Due to speed concerns, I removed this nesting function capability, for processing, requiring data frames to be run with the user specified query. The top lines of code change to: 
+The list function dataset is very complex. This nested function turns
+the user specified type list into the dataframe that we desire. The
+index value is a numerical input that is used to return the function.
+Due to speed concerns, I removed this nesting function capability, for
+processing, requiring data frames to be run with the user specified
+query. The top lines of code change to:
 
-```{r, eval=FALSE}
+``` r
 typeFrame<-function(type, index){
   frame<-types(type)  
 ```
 
-However, for speed reason, this is the function used. The index is a numerical pokemon value. It outputs a single row with 12 columns. 
-```{r}
+However, for speed reason, this is the function used. The index is a
+numerical pokemon value. It outputs a single row with 12 columns.
+
+``` r
 typeFrame<-function(frame, index){
   ###
   # This functions takes the specified type defined by a dataframe in the types function,   # and creates one row of a dataframe by pokemon index number. 
@@ -163,14 +198,15 @@ typeFrame<-function(frame, index){
   #return the dataframe.
   return(pokeFinal)
 }
-
 ```
-
 
 ### listPrep(): Creating the Complete Dataframe
 
-This function is a wrapper function, that takes the single row output of the typeFrame() function, and repeats it for the entire length of the data frame generated from the type function. 
-```{r}
+This function is a wrapper function, that takes the single row output of
+the typeFrame() function, and repeats it for the entire length of the
+data frame generated from the type function.
+
+``` r
 listPrep<-function(typePrep){
   ###
   # This list prep function is a wrapper function that takes in the frame specified 
@@ -189,10 +225,15 @@ listPrep<-function(typePrep){
 }
 ```
 
-### cleanFrame(): Processing the Type Data into Columns 
+### cleanFrame(): Processing the Type Data into Columns
 
-The list prep function creates a data frame, but it is all character data. To utilize this data frame, the column names need to be changed, formatted, and the extras are to be deleted. This function is a wrapper to the listPrep() wrapper function, and generates a fully clean data frame of the user specified type.
-```{r}
+The list prep function creates a data frame, but it is all character
+data. To utilize this data frame, the column names need to be changed,
+formatted, and the extras are to be deleted. This function is a wrapper
+to the listPrep() wrapper function, and generates a fully clean data
+frame of the user specified type.
+
+``` r
 cleanFrame<-function(typePrep){
   ### The purpose of this function is to take the list run through lapply, and clean and
   #   correct the column formatting so the data can be manipulated with dplyr.
@@ -225,16 +266,18 @@ cleanFrame<-function(typePrep){
   lapplyFrame$pokeid<-as.numeric(lapplyFrame$pokeid)
   return(lapplyFrame)
 }  
-
 ```
 
 ## Generation Functions
 
 ### allGen(): Returns All Generations of Pokemon
 
-Like the allPoke() function above, this generation function queries the Pokemon Species Endpoint API to get all of the information available. This is not a function that is user queryable, and is part of the generation function. 
+Like the allPoke() function above, this generation function queries the
+Pokemon Species Endpoint API to get all of the information available.
+This is not a function that is user queryable, and is part of the
+generation function.
 
-```{r}
+``` r
 allGen<-function(){
   #Connect to the Pokemon Species endpoint, using a limit to make sure all are returned.
   allGenURL<-"https://pokeapi.co/api/v2/pokemon-species?limit=1000/"
@@ -249,13 +292,16 @@ allGen<-function(){
   #Return this list when the function is called.
   return(genData1)
 }
-
 ```
 
 ### genOut() Function
 
-This function returns the user specified generational frame, including wrapping in the all functions. It outputs a dataframe of lists that will be run through future functions. Any user specified variables other than the 'all' generations query the Generation endpoint. 
-```{r}
+This function returns the user specified generational frame, including
+wrapping in the all functions. It outputs a dataframe of lists that will
+be run through future functions. Any user specified variables other than
+the ‘all’ generations query the Generation endpoint.
+
+``` r
 genOut <- function(generation){
   ###
   # This functions returns a data.frame with the numeric key and the name of the types      #associated with pokemon. It can also return the data for a single type if a type ID      #number or name is passed.
@@ -314,14 +360,16 @@ genOut <- function(generation){
   return(genPrimary)
  } 
 }
-
 ```
 
 ### genFrame(): Returning a Single Row of Generations Column
 
-Like the type API, because of the volume of the output potential, the object specified as the genOut() passes through this function as the 'frame' argument, and any number put into the index function returns an individual pokemon's row. This returns a single row
+Like the type API, because of the volume of the output potential, the
+object specified as the genOut() passes through this function as the
+‘frame’ argument, and any number put into the index function returns an
+individual pokemon’s row. This returns a single row
 
-```{r}
+``` r
 genFrame<-function(frame, index){
   gen<-frame[[index]]
   pokeid<-gen$id
@@ -333,11 +381,9 @@ genFrame<-function(frame, index){
   pokeGenFinal<-as.data.frame(cbind(pokeid, pokeName, pokeGen, pokeGrowth, pokeHappy,       pokeCapture))
   return(pokeGenFinal)
 }
-
 ```
 
-
-```{r}
+``` r
 genListPrep<-function(genPrep){
   ###
   # This list prep function is a wrapper function that takes in the generation frame        # specified by the user specified type functions, and populates the single row from the   # genFrame and passes it through the lapply function to get a data frame.
@@ -353,11 +399,9 @@ genListPrep<-function(genPrep){
   finalGenFrame<-do.call(rbind.data.frame, finalGenFrame)
   return(finalGenFrame)
 }
-
 ```
 
-```{r}
-
+``` r
 cleanGen<-function(genPrep){
   ### The purpose of this function is to take the list run through lapply, and clean and
   #   correct the column formatting so the data can be manipulated with dplyr.
@@ -368,23 +412,22 @@ cleanGen<-function(genPrep){
   lapplyGen$pokeCapture<-as.numeric(lapplyGen$pokeCapture)
   return(lapplyGen)
 }
-
 ```
 
 ## Merging Functions
 
-We have looked at the two main functions that are put together. In order to do final anlysis (in my case), we want to have the generations data set merged together with the 
+We have looked at the two main functions that are put together. In order
+to do final anlysis (in my case), we want to have the generations data
+set merged together with the
 
-```{r}
+``` r
 mergedFinal<-function(typePrep, genPrep){
   typeMerge<-cleanFrame(typePrep)
   genMerge<-cleanGen(genPrep)
   finalMerge<-merge(typeMerge, genMerge, by=c('pokeid', 'pokeName'), all.y=TRUE)
   return(finalMerge)
 }
-
 ```
-
 
 # Data Analysis
 
@@ -392,7 +435,7 @@ mergedFinal<-function(typePrep, genPrep){
 
 ### Run the Functions
 
-```{r}
+``` r
 #Running the types function for the user determined function (want 'all'). Specify any of the types that the user wishes is possible (there are 20, for reference).
 typeAllFrame<-types('all')
 #Run the genOut function to determine the user defined generation data. Specify any geneartion of Pokemon (there are 8, for reference.)
@@ -401,12 +444,7 @@ genAllFrame<-genOut('all')
 mergedFF<-mergedFinal(typeAllFrame, genAllFrame)
 ```
 
-
-
-
-
-```{r eval=FALSE}
-
+``` r
 tables<-as_tibble(mergedFF)
 
 tables<-tables[!is.na(tables$pokeType1),]
