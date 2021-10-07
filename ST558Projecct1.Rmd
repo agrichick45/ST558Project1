@@ -64,7 +64,7 @@ This function utilizes the Type endpoint to return the information of a type tha
 ```{r}
 types <- function(type){
   ###
-  # This functions returns a data.frame with the numeric key and the name of the types       #associated with pokemon. It can also return the data for a single type if a type ID       #number or name is passed.
+  # This functions returns a data.frame with the numeric key and the name of the types      # associated with pokemon. It can also return the data for a single type if a type ID     # number or name is passed.
   ###
   
   # Get the overall type from the type endpoint, allowing a user specified type.
@@ -126,20 +126,20 @@ types <- function(type){
 
 ### typeFrame(): Returning Several Columns
 
-The list function dataset is very complex. This nested function turns the user specified type list into the dataframe that we desire. The index value is a numerical input that is used to return the function. Due to speed concerns, I removed this nesting function capability, for processing, requiring data frames to be run. The top lines of code change to: 
+The list function dataset is very complex. This nested function turns the user specified type list into the dataframe that we desire. The index value is a numerical input that is used to return the function. Due to speed concerns, I removed this nesting function capability, for processing, requiring data frames to be run with the user specified query. The top lines of code change to: 
 
 ```{r, eval=FALSE}
 typeFrame<-function(type, index){
-  frame<-types(type)
+  frame<-types(type)  
 ```
 
-
+However, for speed reason, this is the function used. The index is a numerical pokemon value. It outputs a single row with 12 columns. 
 ```{r}
 typeFrame<-function(frame, index){
   ###
   # This functions takes the specified type defined by a dataframe in the types function,   # and creates one row of a dataframe by pokemon index number. 
   ###
-  
+ 
   #for simplification, the indexing process is changed to a shorter command
   agg<-frame[[index]]
   #Pull the data for the pokemon ID. 
@@ -165,9 +165,73 @@ typeFrame<-function(frame, index){
 
 ```
 
+
+### listPrep(): Creating the Complete Dataframe
+
+This function is a wrapper function, that takes the single row output of the typeFrame() function, and repeats it for the entire length of the data frame generated from the type function. 
+```{r}
+listPrep<-function(typePrep){
+  ###
+  # This list prep function is a wrapper function that takes in the frame specified 
+  # by the user specified type functions, and populates the single row from the typeFrame   # and passes it through the lapply function to get a data frame.
+  ###
+  
+  #To determine the number of repititions, we need to determine the length of the types     frame. 
+  listLen<-length(typePrep)
+  #Create the index to wrap through the lapply function.
+  numIndex<-1:listLen
+  #Run the typeFrame function on the user specified pokemon type frame the number of times   specified in the index.
+  finalTypeFrame<-lapply(X = numIndex, FUN = typeFrame, frame=typePrep)
+  #Format the lists into a data frame, and return the output.
+  finalFrame<-do.call(rbind.data.frame, finalTypeFrame)
+  return(finalFrame)
+}
+```
+
+### cleanFrame(): Processing the Type Data into Columns 
+
+The list prep function creates a data frame, but it is all character data. To utilize this data frame, the column names need to be changed, formatted, and the extras are to be deleted. This function is a wrapper to the listPrep() wrapper function, and generates a fully clean data frame of the user specified type.
+```{r}
+cleanFrame<-function(typePrep){
+  ### The purpose of this function is to take the list run through lapply, and clean and
+  #   correct the column formatting so the data can be manipulated with dplyr.
+  ###
+  lapplyFrame<-listPrep(typePrep)
+  #rename the columns to their correct name
+  lapplyFrame$hp<-lapplyFrame$`1`
+  #change the column type to numeric
+  lapplyFrame$hp<-as.numeric(lapplyFrame$hp)
+  #remove the old column value.
+  lapplyFrame$`1`<-NULL
+  #repeat this for all columns that it needs to happen to. 
+  lapplyFrame$attack<-lapplyFrame$`2`
+  lapplyFrame$attack<-as.numeric(lapplyFrame$attack)
+  lapplyFrame$`2`<-NULL
+  lapplyFrame$defense<-lapplyFrame$`3`
+  lapplyFrame$defense<-as.numeric(lapplyFrame$defense)
+  lapplyFrame$`3`<-NULL
+  lapplyFrame$specialattack<-lapplyFrame$`4`
+  lapplyFrame$specialattack<-as.numeric(lapplyFrame$specialattack)
+  lapplyFrame$`4`<-NULL
+  lapplyFrame$specialdefense<-lapplyFrame$`5`
+  lapplyFrame$specialdefense<-as.numeric(lapplyFrame$specialdefense)
+  lapplyFrame$`5`<-NULL
+  lapplyFrame$speed<-lapplyFrame$`6`
+  lapplyFrame$speed<-as.numeric(lapplyFrame$speed)
+  lapplyFrame$`6`<-NULL
+  lapplyFrame$pokeHeight<-as.numeric(lapplyFrame$pokeHeight)
+  lapplyFrame$pokeWeight<-as.numeric(lapplyFrame$pokeWeight)
+  lapplyFrame$pokeid<-as.numeric(lapplyFrame$pokeid)
+  return(lapplyFrame)
+}  
+
+```
+
+## Generation Functions
+
 ### allGen(): Returns All Generations of Pokemon
 
-Like the allPoke() function above, this generation function queries the Generation API to get all of the information available. This is not a function that is user queryable, and is part of the generation function. 
+Like the allPoke() function above, this generation function queries the Pokemon Species Endpoint API to get all of the information available. This is not a function that is user queryable, and is part of the generation function. 
 
 ```{r}
 allGen<-function(){
@@ -187,13 +251,16 @@ allGen<-function(){
 
 ```
 
+### genOut() Function
+
+This function returns the user specified generational frame, including wrapping in the all functions. It outputs a dataframe of lists that will be run through future functions. Any user specified variables other than the 'all' generations query the Generation endpoint. 
 ```{r}
 genOut <- function(generation){
   ###
-  # This functions returns a data.frame with the numeric key and the name of the types       #associated with pokemon. It can also return the data for a single type if a type ID       #number or name is passed.
+  # This functions returns a data.frame with the numeric key and the name of the types      #associated with pokemon. It can also return the data for a single type if a type ID      #number or name is passed.
   ###
   
-  # Get the overall generation from the type endpoint, allowing a user specified             # generation.
+  # Get the overall generation from the type endpoint, allowing a user specified            # generation.
   baseURL<-"https://pokeapi.co/api/v2/generation/"
   #pull all of the generation URLs, and put them into a json.
   genData <- RCurl::getURL(baseURL)
@@ -248,104 +315,89 @@ genOut <- function(generation){
 }
 
 ```
-## Type Cleaning Function
-### Using the API to read the urls to Populate the Data Frame
 
-This function was originally designed to take the input from the type function, and process and clean it to the final output. However, I had to change this due to processing speed of the API querying. It took 15 minutes or more  to run this process. To expedite the process, running the user specified type through the function to get the list, which is then fed into the type processing frame as "Frame". The code for the original function driven task is commented out, and replaces the first two lines. 
+### genFrame(): Returning a Single Row of Generations Column
+
+Like the type API, because of the volume of the output potential, the object specified as the genOut() passes through this function as the 'frame' argument, and any number put into the index function returns an individual pokemon's row. This returns a single row
 
 ```{r}
-genFrame<-function(generation, index){
-  frame<-genOut(generation)
-  pokeid<-frame[[index]]$id
-  pokeName<-frame[[index]]$name
-  pokeGen<-frame[[index]]$generation$name
-  pokeGrowth<-frame[[index]]$growth_rate$name
-  pokeHappy<-frame[[index]]$base_happiness
-  pokeCapture<-frame[[index]]$capture_rate
-  pokeGenFinal<-as.data.frame(cbind(pokeid, pokeName, pokeGen, pokeGrowth, pokeHappy,        pokeCapture))
+genFrame<-function(frame, index){
+  gen<-frame[[index]]
+  pokeid<-gen$id
+  pokeName<-gen$name
+  pokeGen<-gen$generation$name
+  pokeGrowth<-gen$growth_rate$name
+  pokeHappy<-gen$base_happiness
+  pokeCapture<-gen$capture_rate
+  pokeGenFinal<-as.data.frame(cbind(pokeid, pokeName, pokeGen, pokeGrowth, pokeHappy,       pokeCapture))
   return(pokeGenFinal)
 }
 
 ```
 
+
 ```{r}
-cleanFrame<-function(lapplyFrame){
-  ### The purpose of this function is to take the list run through lapply, and clean and
-  #   correct the column formatting so the data can be manipulated with dplyr, and   graphed.
+genListPrep<-function(genPrep){
+  ###
+  # This list prep function is a wrapper function that takes in the generation frame        # specified by the user specified type functions, and populates the single row from the   # genFrame and passes it through the lapply function to get a data frame.
   ###
   
-  #rename the columns to their correct name
-  lapplyFrame$hp<-lapplyFrame$`1`
-  #change the column type to numeric
-  lapplyFrame$hp<-as.numeric(lapplyFrame$hp)
-  #remove the old column value.
-  lapplyFrame$`1`<-NULL
-  #repeat this for all columns that it needs to happen to. 
-  lapplyFrame$attack<-lapplyFrame$`2`
-  lapplyFrame$attack<-as.numeric(lapplyFrame$attack)
-  lapplyFrame$`2`<-NULL
-  lapplyFrame$defense<-lapplyFrame$`3`
-  lapplyFrame$defense<-as.numeric(lapplyFrame$defense)
-  lapplyFrame$`3`<-NULL
-  lapplyFrame$specialattack<-lapplyFrame$`4`
-  lapplyFrame$specialattack<-as.numeric(lapplyFrame$specialattack)
-  lapplyFrame$`4`<-NULL
-  lapplyFrame$specialdefense<-lapplyFrame$`5`
-  lapplyFrame$specialdefense<-as.numeric(lapplyFrame$specialdefense)
-  lapplyFrame$`5`<-NULL
-  lapplyFrame$speed<-lapplyFrame$`6`
-  lapplyFrame$speed<-as.numeric(lapplyFrame$speed)
-  lapplyFrame$`6`<-NULL
-  lapplyFrame$pokeHeight<-as.numeric(lapplyFrame$pokeHeight)
-  lapplyFrame$pokeWeight<-as.numeric(lapplyFrame$pokeWeight)
-  lapplyFrame$pokeid<-as.numeric(lapplyFrame$pokeid)
-  return(lapplyFrame)
-}  
-
+  #To determine the number of repetitions, we need to determine the length of the types     frame. 
+  listLen<-length(genPrep)
+  #Create the index to wrap through the lapply function.
+  numIndex<-1:listLen
+  #Run the typeFrame function on the user specified pokemon generation frame the number of   # times specified in the index.
+  finalGenFrame<-lapply(X = numIndex, FUN = genFrame, frame=genPrep)
+  #Format the lists into a data frame, and return the output.
+  finalGenFrame<-do.call(rbind.data.frame, finalGenFrame)
+  return(finalGenFrame)
+}
 
 ```
 
-```{r eval=FALSE}
+```{r}
 
+cleanGen<-function(genPrep){
+  ### The purpose of this function is to take the list run through lapply, and clean and
+  #   correct the column formatting so the data can be manipulated with dplyr.
+  ###
+  lapplyGen<-genListPrep(genPrep)
+  lapplyGen$pokeid<-as.numeric(lapplyGen$pokeid)
+  lapplyGen$pokeHappy<-as.numeric(lapplyGen$pokeHappy)
+  lapplyGen$pokeCapture<-as.numeric(lapplyGen$pokeCapture)
+  return(lapplyGen)
+}
 
-numGenIndex<-1:100
+```
 
-finalGenFrame<-lapply(X = numGenIndex, FUN = genFrame, generation = 3)
+## Merging Functions
 
-finalGenFrame<-do.call(rbind.data.frame, finalFrame)
+We have looked at the two main functions that are put together. In order to do final anlysis (in my case), we want to have the generations data set merged together with the 
 
-finalGenFrame$pokeid<-as.numeric(finalGenFrame$pokeid)
-finalGenFrame$pokeHappy<-as.numeric(finalGenFrame$pokeHappy)
-finalGenFrame$pokeCapture<-as.numeric(finalGenFrame$pokeCapture)
+```{r}
+mergedFinal<-function(typePrep, genPrep){
+  typeMerge<-cleanFrame(typePrep)
+  genMerge<-cleanGen(genPrep)
+  finalMerge<-merge(typeMerge, genMerge, by=c('pokeid', 'pokeName'), all.y=TRUE)
+  return(finalMerge)
+}
 
 ```
 
 
-# Data Preparation
+# Data Analysis
 
-## Filling in and Cleaning the typeCleaning Function
+## Preparation
 
-```{r eval=FALSE}
-#Running the types function for the user determined function (want 'all')
-typeAllFrames<-types('all')
+### Run the Functions
 
-#Calculate the total length of the frame
-listLen<-length(typeAllFrames)
-
-#Calculate the index values necessary for the lapply column.
-numIndex<-1:listLen
-
-#Use the typeAllFrames, and the numIndex values to use the lapply value to get the total frame.
-
-#I have not figured out how to put this into a function with length needed? but I can call this dataframe and proceed.
-finalTypeFrame<-lapply(X = numIndex, FUN = typeFrame, frame=typeAllFrames)
-
-#Convert the data using the do call function into the character dataframe.
-finalFrame<-do.call(rbind.data.frame, finalTypeFrame)
-
-#drop this output frame into the cleanFrame function
-finalClean<-cleanFrame(finalFrame)
-
+```{r}
+#Running the types function for the user determined function (want 'all'). Specify any of the types that the user wishes is possible (there are 20, for reference).
+typeAllFrame<-types('all')
+#Run the genOut function to determine the user defined generation data. Specify any geneartion of Pokemon (there are 8, for reference.)
+genAllFrame<-genOut('all')
+#Run the mergedFinal function to putt together the pokemon id and name, and 14 other desired variables. 
+mergedFF<-mergedFinal(typeAllFrame, genAllFrame)
 ```
 
 
