@@ -29,6 +29,7 @@ Mandy Liesch
             datasets](#mergedfinal-merge-the-type-and-generation-datasets)
 -   [Data Analysis](#data-analysis)
     -   [Run the Functions](#run-the-functions)
+    -   [Popular Pokemon Types](#popular-pokemon-types)
     -   [Are Fat Pokemon Happy?](#are-fat-pokemon-happy)
     -   [Pokemon Weight and Happiness Over
         Time](#pokemon-weight-and-happiness-over-time)
@@ -538,7 +539,90 @@ typeAllFrame<-types('all')
 genAllFrame<-genOut('all')
 #Run the mergedFinal function to putt together the pokemon id and name, and 14 other desired variables. 
 mergedFF<-mergedFinal(typeAllFrame, genAllFrame)
+
+mergedFF<-mergedFF[!is.na(mergedFF$pokeType1),]
 ```
+
+## Popular Pokemon Types
+
+There are several different types of pokemon, and each of them have
+several different characteristics that makes them desirable.
+
+``` r
+#Create a table with the overall primary type
+tableType<-table(mergedFF$pokeType1,  mergedFF$pokeGen)
+knitr::kable(
+  tableType,
+  caption=paste("Pokemon Type by Generation"),
+  col.names = c("Gen 1", "Gen 2", "Gen 3", "Gen 4", "Gen 5", "Gen 6", "Gen 7", 
+                "Gen 8")
+)
+```
+
+|          | Gen 1 | Gen 2 | Gen 3 | Gen 4 | Gen 5 | Gen 6 | Gen 7 | Gen 8 |
+|:---------|------:|------:|------:|------:|------:|------:|------:|------:|
+| bug      |    12 |    10 |    12 |     7 |    18 |     3 |     9 |     3 |
+| dark     |     0 |     5 |     4 |     3 |    13 |     3 |     1 |     7 |
+| dragon   |     3 |     0 |     7 |     3 |     7 |     4 |     3 |     4 |
+| electric |     9 |     6 |     4 |     7 |     6 |     3 |     4 |     8 |
+| fairy    |     2 |     5 |     0 |     1 |     0 |     9 |     1 |     2 |
+| fighting |     7 |     2 |     4 |     2 |     7 |     3 |     4 |     5 |
+| fire     |    12 |     8 |     6 |     5 |     7 |     8 |     5 |     5 |
+| flying   |     0 |     0 |     0 |     0 |     0 |     2 |     0 |     4 |
+| ghost    |     3 |     1 |     4 |     5 |     5 |     2 |     3 |     4 |
+| grass    |    12 |     9 |    12 |    12 |    15 |     5 |    12 |     8 |
+| ground   |     8 |     3 |     6 |     4 |     8 |     0 |     2 |     3 |
+| ice      |     2 |     4 |     6 |     3 |     6 |     2 |     0 |     4 |
+| normal   |    22 |    15 |    18 |    17 |    16 |     4 |    12 |     4 |
+| poison   |    14 |     1 |     3 |     6 |     2 |     2 |     6 |     1 |
+| psychic  |     8 |     7 |     7 |     7 |    14 |     2 |     6 |     4 |
+| rock     |     9 |     4 |     8 |     6 |     6 |     8 |     3 |     4 |
+| steel    |     0 |     2 |     9 |     3 |     4 |     3 |     4 |     4 |
+| water    |    28 |    18 |    24 |    13 |    15 |     5 |     8 |     9 |
+
+Pokemon Type by Generation
+
+``` r
+#Create a table with the overall secondary type.
+tableType<-table(mergedFF$pokeType2,  mergedFF$pokeGen)
+knitr::kable(
+  tableType,
+  caption=paste("Pokemon Secondary Type by Generation"),
+  col.names = c("Gen 1", "Gen 2", "Gen 3", "Gen 4", "Gen 5", "Gen 6", "Gen 7", 
+                "Gen 8")
+)
+```
+
+|          | Gen 1 | Gen 2 | Gen 3 | Gen 4 | Gen 5 | Gen 6 | Gen 7 | Gen 8 |
+|:---------|------:|------:|------:|------:|------:|------:|------:|------:|
+| bug      |     0 |     0 |     2 |     1 |     0 |     0 |     2 |     4 |
+| dark     |     0 |     1 |     6 |     4 |     3 |     2 |     1 |     1 |
+| dragon   |     0 |     1 |     2 |     2 |     3 |     5 |     4 |     7 |
+| electric |     0 |     2 |     0 |     0 |     4 |     0 |     2 |     0 |
+| fairy    |     3 |     3 |     5 |     1 |     2 |     4 |    10 |     4 |
+| fighting |     1 |     1 |     3 |     5 |     7 |     1 |     6 |     0 |
+| fire     |     0 |     2 |     0 |     0 |     7 |     0 |     2 |     2 |
+| flying   |    19 |    19 |    12 |    14 |    15 |     6 |     6 |     0 |
+| ghost    |     0 |     0 |     2 |     2 |     4 |     3 |     4 |     4 |
+| grass    |     2 |     1 |     5 |     0 |     5 |     2 |     1 |     2 |
+| ground   |     6 |     7 |     7 |     6 |     2 |     2 |     2 |     0 |
+| ice      |     3 |     1 |     0 |     3 |     1 |     2 |     1 |     2 |
+| normal   |     0 |     0 |     0 |     0 |     0 |     4 |     0 |     1 |
+| poison   |    19 |     3 |     2 |     2 |     5 |     0 |     1 |     1 |
+| psychic  |     6 |     3 |    12 |     2 |     0 |     3 |     2 |     3 |
+| rock     |     2 |     3 |     4 |     1 |     4 |     0 |     0 |     1 |
+| steel    |     2 |     2 |     0 |     7 |     8 |     0 |     4 |     1 |
+| water    |     4 |     0 |     4 |     1 |     0 |     4 |     4 |     1 |
+
+Pokemon Secondary Type by Generation
+
+These types are not found in equal frequency in the poke-world. The most
+common type is water, with 120 pokemon with water as their primary type,
+followed by normal type, then Grass and Bug type, which account for 44%
+of pokemon. The least popular primary type (flying), is the most common
+secondary type (3x more common than any other secondary type). This
+means that a lot of bird-like pokemon have other types that take
+precedence over their classifications.
 
 ## Are Fat Pokemon Happy?
 
@@ -582,7 +666,7 @@ plot1 <- ggplot(plotFF, aes(BMI,
 plot1
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-17-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-18-1.png)<!-- -->
 
 It appears that there is a slight negative correlation to baseline
 happiness to BMI, however, it appears most pokemon are pretty happy,
@@ -611,7 +695,7 @@ plot2 <- ggplot(plotFF, aes(pokeWeight,
 plot2
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-18-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-19-1.png)<!-- -->
 
 \#\#Are Heavy Pokemon Powerful?
 
@@ -655,7 +739,7 @@ plot3 <- ggplot(plotFF, aes(SUM, pokeWeight, color=SumAttack)) +
 plot3
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-20-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-21-1.png)<!-- -->
 
 Like in people, big people know they are being used to lift heavy stuff,
 and pull tall objects off the shelf. These high attack power and higher
@@ -826,7 +910,7 @@ plot4<-ggplot(data=graphBreak, aes(x=pokeGen, y=Happiness, group=pokeType1,
 plot4
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-25-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-26-1.png)<!-- -->
 
 However, looking at the overall data of even the happiest type of
 pokemon, it is clear that there is a strong decline in happiness, even
@@ -837,11 +921,11 @@ are struggling now, where they never had before.
 
 This Pokemon Vignette uses several built in functions and tidyverse
 packages to expose the increasing amount of sadness and heavier weights
-occuring in the Pokemon Universe over time with visuals, graphs, and
-tables. This is cutting edge reasearch into newly arising problems in
+occurring in the Pokemon Universe over time with visuals, graphs, and
+tables. This is cutting edge research into newly arising problems in
 pokemon culture. Future research questions include: \* Is this increase
 in sadness a response to colonial expansion to these new areas in new
 generations? Or are we just discovering more diverse colony types in
-harser parts of the world? \* Are these pokemon who are heavy and less
+harsher parts of the world? \* Are these pokemon who are heavy and less
 happy found in more rural areas? \* Where are the best places to put
 pokemon intervention centers.

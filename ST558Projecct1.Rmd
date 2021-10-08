@@ -484,7 +484,37 @@ typeAllFrame<-types('all')
 genAllFrame<-genOut('all')
 #Run the mergedFinal function to putt together the pokemon id and name, and 14 other desired variables. 
 mergedFF<-mergedFinal(typeAllFrame, genAllFrame)
+
+mergedFF<-mergedFF[!is.na(mergedFF$pokeType1),]
+
 ```
+
+## Popular Pokemon Types
+
+There are several different types of pokemon, and each of them have several different characteristics that makes them desirable. 
+
+```{r}
+#Create a table with the overall primary type
+tableType<-table(mergedFF$pokeType1,  mergedFF$pokeGen)
+knitr::kable(
+  tableType,
+  caption=paste("Pokemon Type by Generation"),
+  col.names = c("Gen 1", "Gen 2", "Gen 3", "Gen 4", "Gen 5", "Gen 6", "Gen 7", 
+                "Gen 8")
+)
+
+#Create a table with the overall secondary type.
+tableType<-table(mergedFF$pokeType2,  mergedFF$pokeGen)
+knitr::kable(
+  tableType,
+  caption=paste("Pokemon Secondary Type by Generation"),
+  col.names = c("Gen 1", "Gen 2", "Gen 3", "Gen 4", "Gen 5", "Gen 6", "Gen 7", 
+                "Gen 8")
+)
+
+```
+
+These types are not found in equal frequency in the poke-world. The most common type is water, with 120 pokemon with water as their primary type, followed by normal type, then Grass and Bug type, which account for 44% of pokemon. The least popular primary type (flying), is the most common secondary type (3x more common than any other secondary type). This means that a lot of bird-like pokemon have other types that take precedence over their classifications.
 
 ## Are Fat Pokemon Happy?
 The thousands of different pokemon have an ideal weight and type associated with their species. Poke-scientists have also studied the baseline level of happiness that come when a person first catches a pokemon. Some species are much happier than others. Does this correspond with the pokemons overall weight?
@@ -690,8 +720,8 @@ However, looking at the overall data of even the happiest type of pokemon, it is
 
 # Conclusions
 
-This Pokemon Vignette uses several built in functions and tidyverse packages to expose the increasing amount of sadness and heavier weights occuring in the Pokemon  Universe over time with visuals, graphs, and tables. This is cutting edge reasearch into newly arising problems in pokemon culture. 
+This Pokemon Vignette uses several built in functions and tidyverse packages to expose the increasing amount of sadness and heavier weights occurring in the Pokemon  Universe over time with visuals, graphs, and tables. This is cutting edge research into newly arising problems in pokemon culture. 
 Future research questions include:
-* Is this increase in sadness a response to colonial expansion to these new areas in new generations? Or are we just discovering more diverse colony types in harser parts of the world?
+* Is this increase in sadness a response to colonial expansion to these new areas in new generations? Or are we just discovering more diverse colony types in harsher parts of the world?
 * Are these pokemon who are heavy and less happy found in more rural areas?
 * Where are the best places to put pokemon intervention centers. 
