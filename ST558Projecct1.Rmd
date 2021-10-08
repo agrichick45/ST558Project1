@@ -12,8 +12,16 @@ R is a super versatile software, and we are allowed to write many different func
 
 *[`jsonlinte` Package](https://cran.r-project.org/web/packages/jsonlite/index.html): is a package that interprets and parses the json data output of the APIs.
 
+*[`tidyverse` Package](https://www.tidyverse.org/): is a comprehensive data management package, it includes functions to clean, manipulate, and process data, and is one of the flagships of data science in R.
 
-```{r, echo=FALSE, warning=FALSE}
+*[`RCurl` Package](https://cran.r-project.org/web/packages/RCurl/index.html): Like httr, RCurl provides functions to allow one to compose general HTTP requests and work with APIs.
+
+*[`ggplot` Package](https://ggplot2.tidyverse.org/): a comprehensive graphing package from the tidyverse. 
+
+*[`knitr` Package](https://www.r-project.org/nosvn/pandoc/knitr.html): A package that manipulates data to control visual output.
+
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
 #load the required packages
 require("httr")
 require("jsonlite")

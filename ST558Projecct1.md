@@ -1,54 +1,37 @@
-ST558Project
+The Upcoming Pokemon Crisis Vignette
 ================
 Mandy Liesch
-10/2/2021
-
--   [Required Packages](#required-packages)
--   [Function Creation](#function-creation)
-    -   [Type Fuctions](#type-fuctions)
-        -   [allPoke(): Returns ALL
-            Pokemon](#allpoke-returns-all-pokemon)
-        -   [types(): User Defined Type](#types-user-defined-type)
-        -   [typeFrame(): Returning Several
-            Columns](#typeframe-returning-several-columns)
-        -   [listPrep(): Creating the Complete
-            Dataframe](#listprep-creating-the-complete-dataframe)
-        -   [cleanFrame(): Processing the Type Data into
-            Columns](#cleanframe-processing-the-type-data-into-columns)
-    -   [Generation Functions](#generation-functions)
-        -   [allGen(): Returns All Generations of
-            Pokemon](#allgen-returns-all-generations-of-pokemon)
-        -   [genOut() Function](#genout-function)
-        -   [genFrame(): Returning a Single Row of Generations
-            Column](#genframe-returning-a-single-row-of-generations-column)
-    -   [Merging Functions](#merging-functions)
--   [Data Analysis](#data-analysis)
-    -   [Preparation](#preparation)
-        -   [Run the Functions](#run-the-functions)
-
-\#`{r, include=FALSE} #knitr::opts_chunk$set(echo = TRUE) #`
 
 # Required Packages
 
-``` r
-#load the required packages
-require("httr")
-require("jsonlite")
-require("tidyverse")
-require("RCurl")
-require("ggplot2")
-library(usethis)
-library(knitr)
-library(rmarkdown)
-use_git_config(user.name="Mandy Liesch", user.email="amliesch@ncsu.edu")
-```
+R is a super versatile software, and we are allowed to write many
+different functions using a suite of packages that make analysis and
+data science much easier. The required packages are as followed.
 
-``` r
-#code to create the rendering
-rmarkdown::render("ST558Projecct1.Rmd", 
-                  output_format = "github_document", 
-                  output_options = list(toc=TRUE, toc_depth = 3, html_preview=FALSE))
-```
+\*[`httr`
+Package](https://cran.r-project.org/web/packages/httr/vignettes/quickstart.html):
+is a package that provides a wrapper for the curl package, allowing
+pulling of data from API web pages.
+
+\*[`jsonlinte`
+Package](https://cran.r-project.org/web/packages/jsonlite/index.html):
+is a package that interprets and parses the json data output of the
+APIs.
+
+\*[`tidyverse` Package](https://www.tidyverse.org/): is a comprehensive
+data management package, it includes functions to clean, manipulate, and
+process data, and is one of the flagships of data science in R.
+
+\*[`RCurl`
+Package](https://cran.r-project.org/web/packages/RCurl/index.html): Like
+httr, RCurl provides functions to allow one to compose general HTTP
+requests and work with APIs.
+
+\*[`ggplot` Package](https://ggplot2.tidyverse.org/): a comprehensive
+graphing package from the tidyverse.
+
+\*[`knitr` Package](https://www.r-project.org/nosvn/pandoc/knitr.html):
+A package that manipulates data to control visual output.
 
 # Function Creation
 
@@ -66,15 +49,18 @@ output by type.
 ``` r
 #Return all the pokemon names and their informative urls into a dataframe. 
 allPoke<-function(){
-  #Connect to the Pokemon endpoint, using a limit to make sure all are returned.
+  ### This function Connects to the Pokemon endpoint, using a limit 
+  #to make sure all are returned.
   allPokeURL<-"https://pokeapi.co/api/v2/pokemon?limit=1500"
   #Utilize the RCurl to get all of the json data from the endpoint
   pokeData <- RCurl::getURL(allPokeURL)
   #Parse the JSon data into a list with the content variables
   pokeDataDF<-jsonlite::fromJSON(pokeData)
-  #pull all of the important results into the dataframe (the pokemon name and URL)
+  #pull all of the important results into the dataframe 
+  #(the pokemon name and URL)
   output <- pokeDataDF$results
-  #Use the purr package to pull all of the JSON Data for each pokemon URL into a list.
+  #Use the purr package to pull all of the JSON Data for each pokemon
+  #URL into a list.
   pokeData1<-purrr::map(output$url, jsonlite::fromJSON)
   #Return this list when the function is called. 
   return(pokeData1)
@@ -94,10 +80,13 @@ returned of appropriate options in Pokemon type.
 ``` r
 types <- function(type){
   ###
-  # This functions returns a data.frame with the numeric key and the name of the types      # associated with pokemon. It can also return the data for a single type if a type ID     # number or name is passed.
+  # This functions returns a data.frame with the numeric key and the name
+  # of the types associated with pokemon. It can also return the data for 
+  # a single type if a type ID number or name is passed.
   ###
   
-  # Get the overall type from the type endpoint, allowing a user specified type.
+  # Get the overall type from the type endpoint, allowing a user specified
+  #type.
   baseURL<-"https://pokeapi.co/api/v2/type/"
   # pull the information for all types from the endpoint
   typeData <- RCurl::getURL(baseURL)
@@ -105,11 +94,13 @@ types <- function(type){
   typeDataDF<-jsonlite::fromJSON(typeData)
   # Select and create the type data.frame from the results.
   output <-  typeDataDF$results
-  #Create a table to return the type and number in case bad input is specified.
+  #Create a table to return the type and number in case bad input is
+  #specified.
   outputType <- data.frame(type=1:20, output)
   
   #First If Function
-  # If type does not equal "all", check if it is a valid pokemon type or numeric value.
+  # If type does not equal "all", check if it is a valid pokemon type
+  #or numeric value.
   if (type != "all"){
     
     # If type is in the numeric type column, subset output for just that row.
@@ -127,7 +118,8 @@ types <- function(type){
       #Return the dataframe.
       return(pokePrimary)
     }
-    # If type is in the name column, subset output for just that table, see above for          # documentation.
+    # If type is in the name column, subset output for just that table, see
+    #above for documentation.
     if (type %in% outputType$name){
       pokeType <- type
       pokeTypeSpec <-GET(paste0(baseURL,pokeType))
@@ -136,10 +128,14 @@ types <- function(type){
       pokePrimary<-purrr::map(typeParseRes$pokemon$url, jsonlite::fromJSON)
       return(pokePrimary)
     }
-    # Otherwise, if type does not equal all, throw an informative error, return the options     # table.
+    # Otherwise, if type does not equal all, throw an informative error,
+    #return the options table.
     else {
-    message <- paste("ERROR: The numeric Index of Pokemon Type, or Pokemon Type is not                          clear.",
-                    "Select from the menu above, or type('all') to find information of all                      of the Pokemon Type you're looking for.")
+    message <- paste("ERROR: The numeric Index of Pokemon Type, or Pokemon
+                     Type is not clear.",
+                     "Select from the menu above, or type('all') to find 
+                     information of all of the Pokemon Type you're looking
+                     for.")
     print(outputType[1:2])
     stop(message)
     }
@@ -189,11 +185,12 @@ typeFrame<-function(frame, index){
   pokeType1<-agg$types$type$name[1]
   #Pull data from Type 2.
   pokeType2<-agg$types$type$name[2]
-  #The stats column for pokemon stats is vertical, and needs to be transposed
+  #The stats column for pokemon stats is vertical, and needs to be           #transposed
   #so it fits onto one line. It is the first column of the $stats data.
   stats<-t(agg[["stats"]][1])
   #Create a dataframe
-  pokeFinal<-as.data.frame(cbind(pokeid, pokeName, pokeHeight, pokeWeight, pokeType1,        pokeType2, stats))
+  pokeFinal<-as.data.frame(cbind(pokeid, pokeName, pokeHeight, pokeWeight,
+                                 pokeType1, pokeType2, stats))
   #return the dataframe.
   return(pokeFinal)
 }
@@ -208,15 +205,19 @@ data frame generated from the type function.
 ``` r
 listPrep<-function(typePrep){
   ###
-  # This list prep function is a wrapper function that takes in the frame specified 
-  # by the user specified type functions, and populates the single row from the typeFrame   # and passes it through the lapply function to get a data frame.
+  # This list prep function is a wrapper function that takes in the frame
+  #specified by the user specified type functions, and populates the single
+  #row from the typeFrame and passes it through the lapply function to get
+  #a data frame.
   ###
   
-  #To determine the number of repititions, we need to determine the length of the types     frame. 
+  #To determine the number of repititions, we need to determine the length
+  #of the types frame. 
   listLen<-length(typePrep)
   #Create the index to wrap through the lapply function.
   numIndex<-1:listLen
-  #Run the typeFrame function on the user specified pokemon type frame the number of times   specified in the index.
+  #Run the typeFrame function on the user specified pokemon type frame the
+  #number of times specified in the index.
   finalTypeFrame<-lapply(X = numIndex, FUN = typeFrame, frame=typePrep)
   #Format the lists into a data frame, and return the output.
   finalFrame<-do.call(rbind.data.frame, finalTypeFrame)
@@ -234,8 +235,9 @@ frame of the user specified type.
 
 ``` r
 cleanFrame<-function(typePrep){
-  ### The purpose of this function is to take the list run through lapply, and clean and
-  #   correct the column formatting so the data can be manipulated with dplyr.
+  ### The purpose of this function is to take the list run through 
+  #lapply,and clean and correct the column formatting so the data can be
+  #manipulated with dplyr.
   ###
   lapplyFrame<-listPrep(typePrep)
   #rename the columns to their correct name
@@ -278,15 +280,18 @@ generation function.
 
 ``` r
 allGen<-function(){
-  #Connect to the Pokemon Species endpoint, using a limit to make sure all are returned.
+  #Connect to the Pokemon Species endpoint, using a limit to make sure all
+  #are returned.
   allGenURL<-"https://pokeapi.co/api/v2/pokemon-species?limit=1000/"
   #Utilize the RCurl to get all of the json data from the endpoint
   genData <- RCurl::getURL(allGenURL)
   #Parse the JSon data into a list with the content variables
   genDataDF<-jsonlite::fromJSON(genData)
-  #pull all of the important results into the dataframe (the pokemon name and URL)
+  #pull all of the important results into the dataframe (the pokemon name
+  #and URL)
   output <- genDataDF$results
-  #Use the purr package to pull all of the JSON Data for each pokemon URL into a list.
+  #Use the purr package to pull all of the JSON Data for each pokemon URL
+  #into a list.
   genData1<-purrr::map(output$url, jsonlite::fromJSON)
   #Return this list when the function is called.
   return(genData1)
@@ -303,24 +308,29 @@ the ‘all’ generations query the Generation endpoint.
 ``` r
 genOut <- function(generation){
   ###
-  # This functions returns a data.frame with the numeric key and the name of the types      #associated with pokemon. It can also return the data for a single type if a type ID      #number or name is passed.
+  # This functions returns a data.frame with the numeric key and the name
+  #of the generations associated with pokemon. It can also return the data
+  #for a single generation if a numeric ID of generation is passed.
   ###
   
-  # Get the overall generation from the type endpoint, allowing a user specified            # generation.
+  # Get the overall generation from the type endpoint, allowing a user
+  #specified generation.
   baseURL<-"https://pokeapi.co/api/v2/generation/"
   #pull all of the generation URLs, and put them into a json.
   genData <- RCurl::getURL(baseURL)
   genDataDF<-jsonlite::fromJSON(genData)
   
-  # Select and create the type data.frame from the results.
+  # Select and create the generation data.frame from the results.
   output <-  genDataDF$results
   #create the data frame needed for specifying errors.
   outputGen <- data.frame(gen=1:8, output)
   
-  # If generation does not equal "all", check if it is a valid pokemon type or numeric       #value.
+  # If generation does not equal "all", check if it is a valid pokemon
+  #generation or numeric value.
   if (generation != "all"){
     
-    # If generation is in the number column, subset output for just that row.
+    # If generation is in the number column, subset output for just that
+    #row.
     if (generation %in% outputGen$name){
       #use the user specified value to generate the new API section.
       pokeGen <- generation
@@ -335,8 +345,8 @@ genOut <- function(generation){
       #Return the list.
       return(genPrimary)
     }
-    # If generation is in the generation list column, subset output for just that row.
-    #Repeats from above
+    # If generation is in the generation list column, subset output for
+    #just that row.Repeats from above
     if (generation %in% outputGen$gen){
       pokeGen <- generation
       pokeGenSpec <-GET(paste0(baseURL,pokeGen))
@@ -345,15 +355,20 @@ genOut <- function(generation){
       genPrimary<-purrr::map(genParseRes$url, jsonlite::fromJSON)
       return(genPrimary)
     }
-    # Otherwise, throw an informative error to get the appropriate values that occur. .
+    # Otherwise, throw an informative error to get the appropriate values
+    #that occur.
     else {
-    message <- paste("ERROR: The number or index of generation chosen is not a valid                           selection.",
-                     "Select from the menu above, of try generation('all') to find the                         Pokemon and Generation you're looking for.")
-               print(outputGen[1:2])
-               stop(message)
+    message <- paste("ERROR: The number or index of generation chosen is
+                     not a valid selection.",
+                     "Select from the menu above, of try generation('all')
+                     to find the Pokemon and Generation you're looking
+                     for.")
+    print(outputGen[1:2])
+    stop(message)
     }
   }
-  #If all is specified, then run the allGen() function that we defined earlier.
+  #If all is specified, then run the allGen() function that we defined
+  #earlier.
   else {
   genPrimary<-allGen() 
   return(genPrimary)
@@ -370,29 +385,55 @@ individual pokemon’s row. This returns a single row
 
 ``` r
 genFrame<-function(frame, index){
+  ### 
+  # This function, like the pokemon type frame, takes the user defined
+  # generation data and gets the necessary data from the generation
+  # list specified above.
+  ###
+  
+  #This is a function to simplify the process later down the list.
   gen<-frame[[index]]
+  #Get the pokemon ID
   pokeid<-gen$id
+  #Get the pokemon name.
   pokeName<-gen$name
+  #Pull the pokemon generation data
   pokeGen<-gen$generation$name
+  #Grab the categorical pokemon growth rate.
   pokeGrowth<-gen$growth_rate$name
+  #Pull the pokemon baseline happiness levels. 
   pokeHappy<-gen$base_happiness
+  #Get the ease of capture rate
   pokeCapture<-gen$capture_rate
-  pokeGenFinal<-as.data.frame(cbind(pokeid, pokeName, pokeGen, pokeGrowth, pokeHappy,       pokeCapture))
+  #Bind everything together into one dataframe.
+  pokeGenFinal<-as.data.frame(cbind(pokeid, pokeName, pokeGen, pokeGrowth,
+                                    pokeHappy, pokeCapture))
+  #return the final row in the data frame.
   return(pokeGenFinal)
 }
 ```
 
+### genListPrep(): Repeat the Generation Function
+
+This function takes the generation function we defined before, and runs
+it through the lapply function for the entire data frame.
+
 ``` r
 genListPrep<-function(genPrep){
   ###
-  # This list prep function is a wrapper function that takes in the generation frame        # specified by the user specified type functions, and populates the single row from the   # genFrame and passes it through the lapply function to get a data frame.
+  # This list prep function is a wrapper function that takes in the
+  #generation frame specified by the user specified type functions, and
+  #populates the single row from the genFrame and passes it through the
+  #lapply function to get a data frame.
   ###
   
-  #To determine the number of repetitions, we need to determine the length of the types     frame. 
+  #To determine the number of repetitions, we need to determine the length
+  #of the generation frame. 
   listLen<-length(genPrep)
   #Create the index to wrap through the lapply function.
   numIndex<-1:listLen
-  #Run the typeFrame function on the user specified pokemon generation frame the number of   # times specified in the index.
+  #Run the genFrame function on the user specified pokemon generation frame
+  #the number of times specified in the index.
   finalGenFrame<-lapply(X = numIndex, FUN = genFrame, frame=genPrep)
   #Format the lists into a data frame, and return the output.
   finalGenFrame<-do.call(rbind.data.frame, finalGenFrame)
@@ -400,39 +441,61 @@ genListPrep<-function(genPrep){
 }
 ```
 
+### cleanGen(): Cleaning the Generation Dataframe
+
+Like the previous type functions, the generation cleaning frame takes
+the dataframe that was generated by the user specified generation value,
+and converts the data into the correct formats.
+
 ``` r
 cleanGen<-function(genPrep){
-  ### The purpose of this function is to take the list run through lapply, and clean and
-  #   correct the column formatting so the data can be manipulated with dplyr.
+  ### 
+  # The purpose of this function is to take the list run through lapply,
+  # and clean and correct the column formatting so the data can be
+  # manipulated with dplyr.
   ###
+  
+  #get the dataframe defined in the genListPrep() function.
   lapplyGen<-genListPrep(genPrep)
+  #Convert the character data into numeric data.
   lapplyGen$pokeid<-as.numeric(lapplyGen$pokeid)
   lapplyGen$pokeHappy<-as.numeric(lapplyGen$pokeHappy)
   lapplyGen$pokeCapture<-as.numeric(lapplyGen$pokeCapture)
+  #Return the data frame.
   return(lapplyGen)
 }
 ```
 
 ## Merging Functions
 
+### mergedFinal(): Merge the type and generation datasets
+
 We have looked at the two main functions that are put together. In order
 to do final anlysis (in my case), we want to have the generations data
-set merged together with the
+set merged together with the pokemon dataset to get our final output
+creation.
 
 ``` r
 mergedFinal<-function(typePrep, genPrep){
+  ###
+  # This function takes the user defined type output, and generation 
+  # output frames and merges them together into one final dataset, that
+  # was built from four different APIs.
+  ###
+  
+  #Call the cleaning frame of both the type, and generation.
   typeMerge<-cleanFrame(typePrep)
   genMerge<-cleanGen(genPrep)
-  finalMerge<-merge(typeMerge, genMerge, by=c('pokeid', 'pokeName'), all.y=TRUE)
+  #Merge the files together by both the pokemon ID and pokemon name.
+  finalMerge<-merge(typeMerge, genMerge, by=c('pokeid', 'pokeName'),
+                    all.y=TRUE)
   return(finalMerge)
 }
 ```
 
 # Data Analysis
 
-## Preparation
-
-### Run the Functions
+## Run the Functions
 
 ``` r
 #Running the types function for the user determined function (want 'all'). Specify any of the types that the user wishes is possible (there are 20, for reference).
@@ -443,29 +506,272 @@ genAllFrame<-genOut('all')
 mergedFF<-mergedFinal(typeAllFrame, genAllFrame)
 ```
 
+## Are Fat Pokemon Happy?
+
+The thousands of different pokemon have an ideal weight and type
+associated with their species. Poke-scientists have also studied the
+baseline level of happiness that come when a person first catches a
+pokemon. Some species are much happier than others. Does this correspond
+with the pokemons overall weight?
+
+To calculate the pokemon BMI, we need to use the dataframe we returned,
+and the mutate function to create a new variable called BMI. There is
+one miserable pokemon (Happiness of 0, with a BMI of nearly 10,000), so
+we filter out his data, as it is an outlier.
+
 ``` r
-gen3Fire<-merge(finalFrame, finalGenFrame, by=c('pokeid','pokeName'))
-tables<-cleanFrame(finalFrame)
-tables<-as_tibble(tables)
+mergedFF<- mergedFF %>%
+  mutate(BMI = pokeWeight/(pokeHeight*pokeHeight))
 
-bargraph<-tables %>%
-    mutate(SUM = rowSums(.[7:12])) %>%
-    group_by(pokeType1) %>%
-    summarise_at(vars(SUM), list(Average = mean))
-
-plot1 <- ggplot(bargraph)
-  
-
-tables %>%
-  count(pokeType1) %>%
-  mutate(Percentage=n/sum(n)*100)
-
-tables %>%
-  count(pokeType2) %>%
-  mutate(Percentage=n/sum(n)*100)
-  
-
-hist2 <- tables %>%
-  group_by(pokeType2) %>%
-  summarise(Freq=n())
+plotFF<- mergedFF %>%
+  filter(BMI < 50)
 ```
+
+Then, we can plot the overall happiness of the pokemon, vs their BMI in
+ggplot2.
+
+``` r
+plot1 <- ggplot(plotFF, aes(BMI,
+                               pokeHappy)) +
+  # Add a scatter plot layer and adjust the size and opaqueness of points.
+  geom_point(size=3, alpha=0.75) + 
+  # Remove the legend.
+  theme(legend.position="none") + 
+  # Add a black regression line.
+  geom_smooth(method=lm, formula=y~x, color="black") + 
+  # Add labels to the axes.
+  scale_x_continuous("Pokemon BMI") + 
+  scale_y_continuous("Pokemon Happiness Level") + 
+  # Add a title.
+  ggtitle("Baseline Pokemon Happiness and BMI")
+
+plot1
+```
+
+![](ST558Projecct1_files/figure-gfm/unnamed-chunk-17-1.png)<!-- -->
+
+It appears that there is a slight negative correlation to baseline
+happiness to BMI, however, it appears most pokemon are pretty happy,
+despite their BMI. However, as the following plot shows, even with the
+super high numbers filtered out, heavier pokemon still have a higher
+overall sadness level, despite their density. As a super dense, yet
+heavy human, and not a poke-scientist, I can only speculate that they
+have bodily wear and tear from using their body, repeatedly in fights,
+combined with the higher wear and tear of moving and feeding heavy mass.
+
+``` r
+plot2 <- ggplot(plotFF, aes(pokeWeight,
+                               pokeHappy)) +
+  # Add a scatter plot layer and adjust the size and opaqueness of points.
+  geom_point(size=3, alpha=0.75) + 
+  # Remove the legend.
+  theme(legend.position="none") + 
+  # Add a black regression line.
+  geom_smooth(method=lm, formula=y~x, color="black") + 
+  # Add labels to the axes.
+  scale_x_continuous("Pokemon Weight") + 
+  scale_y_continuous("Overall Pokemon Happiness") + 
+  # Add a title.
+  ggtitle("Fat Pokemon are Less Happy")
+
+plot2
+```
+
+![](ST558Projecct1_files/figure-gfm/unnamed-chunk-18-1.png)<!-- -->
+
+\#\#Are Heavy Pokemon Powerful?
+
+Now, we need to look at the overall statistics a pokemon has. This is
+done by summing all of the attack, defense, speed, and hitpoints
+
+``` r
+#Use dplyr to calculate the total sum of the power statistics
+plotFF<- plotFF %>%
+  #Add a new column summing six numerical columns together.
+  mutate(SUM = rowSums(.[7:12]))
+
+plotFF<- plotFF %>%
+  #Calculate the total attack stats in Pokemon.
+  mutate(SumAttack = attack + specialattack)
+```
+
+Now, in most societies, power tends to be a good thing. And in pokemon,
+the overall total sum of all of the statistics shows how much power and
+value a pokemon has. Even though fat pokemon tend to have more power,
+overall, it appears this level of power really weighs on their mind. The
+colored circles represent the attack power, and the heavier a pokemon
+is, the more power it has.
+
+``` r
+plot3 <- ggplot(plotFF, aes(SUM, pokeWeight, color=SumAttack)) +
+  # Add a scatter plot layer and adjust the size and opaqueness of points.
+  geom_point(size=3, alpha=0.75) + 
+  # Add a color gradient for winPercentage.
+  scale_color_gradient(low="blue", high="red") +
+  # Remove the legend.
+  theme(legend.position="none") + 
+  # Add a black regression line.
+  geom_smooth(method=lm, formula=y~x^2, color="black") + 
+  # Add labels to the axes.
+  scale_x_continuous("Sum of All Power Stats") + 
+  scale_y_continuous("Pokemon Weight") + 
+  # Add a title.
+  ggtitle("Heavy Pokemon are More Powerful, Especially in Attack Power (Redder)")
+
+plot3
+```
+
+![](ST558Projecct1_files/figure-gfm/unnamed-chunk-20-1.png)<!-- -->
+
+Like in people, big people know they are being used to lift heavy stuff,
+and pull tall objects off the shelf. These high attack power and higher
+stat pokemon are likely used in Poke-national defense, and super hard,
+manual labor jobs, so the fact that heavier pokemon tend to be less
+happy makes sense. Power is a heavy responsibility and weight these
+heavy pokemon disproportionately wear.
+
+## Pokemon Weight and Happiness Over Time
+
+So, we have data over multiple generations, showing the avereage weight
+of pokemon over time. This data can be summerized into categories and
+shown in a table.
+
+``` r
+#creating a function to summerize pokemon weight by generation
+breakdown <- plotFF %>%
+ group_by(pokeGen) %>%
+ summarise(Weight = mean(pokeWeight))
+
+#Summerise pokemon Happiness by generations.
+breakdown1 <- plotFF %>%
+  group_by(pokeGen) %>%
+  summarise(Happiness = mean(pokeHappy))
+
+#merge the two data frames together for a numerical table.
+fullbreak<-merge(breakdown, breakdown1, by='pokeGen')
+```
+
+It appears that, like American Society, pokemon are getting heavier and
+sadder over time as well, peaking in generation 7, with sadness
+continuing to decline over time substatially. Generation 4 was both fat,
+and happy, but the wear of Pokesociety is starting to get to the newer
+pokemon.
+
+``` r
+#Create a new table with the pokemon weight and happiness over time.
+knitr::kable(
+  fullbreak,
+  caption=paste("Pokemon Weight and Happiness over Generations"),
+  col.names = c("Generation",
+                           "Weight",
+                           "Happiness"),
+  digits=2
+)
+```
+
+| Generation      |  Weight | Happiness |
+|:----------------|--------:|----------:|
+| generation-i    |  459.52 |     69.74 |
+| generation-ii   |  491.05 |     66.10 |
+| generation-iii  |  671.25 |     62.43 |
+| generation-iv   |  718.09 |     68.37 |
+| generation-v    |  524.62 |     65.03 |
+| generation-vi   |  532.63 |     66.25 |
+| generation-vii  | 1046.45 |     51.22 |
+| generation-viii |  747.69 |     48.67 |
+
+Pokemon Weight and Happiness over Generations
+
+## Does Type Influence Happiness and Weight?
+
+Looking at generational and weight trends, it is possible to look at
+trends by primary pokemon type.
+
+``` r
+typeWeight<- plotFF %>%
+  group_by(pokeType1) %>%
+  summarise(Weight = mean(pokeWeight))
+
+typeHappy<- plotFF %>%
+  group_by(pokeType1) %>%
+  summarise(Happiness = mean(pokeHappy))
+
+typeMerged<-merge(typeWeight, typeHappy, by= 'pokeType1', all=TRUE)
+
+
+knitr::kable(
+  typeMerged,
+  caption=paste("Pokemon Weight and Happiness over Different Types"),
+  col.names = c("Primary Type",
+                           "Weight",
+                           "Happiness"),
+  digits=2
+)
+```
+
+| Primary Type |  Weight | Happiness |
+|:-------------|--------:|----------:|
+| bug          |  330.24 |     66.35 |
+| dark         |  618.78 |     42.36 |
+| dragon       | 1024.45 |     43.39 |
+| electric     |  426.15 |     63.09 |
+| fairy        |  212.40 |     75.00 |
+| fighting     |  558.56 |     65.00 |
+| fire         |  610.50 |     65.54 |
+| flying       |  339.67 |     56.67 |
+| ghost        |  414.52 |     57.41 |
+| grass        |  330.21 |     65.65 |
+| ground       | 1248.09 |     66.18 |
+| ice          | 1214.44 |     62.59 |
+| normal       |  441.78 |     68.56 |
+| poison       |  621.91 |     64.86 |
+| psychic      |  359.61 |     65.74 |
+| rock         | 1236.73 |     61.77 |
+| steel        | 2105.24 |     46.55 |
+| water        |  530.09 |     66.46 |
+
+Pokemon Weight and Happiness over Different Types
+
+The biggest discrepancy between the correlation of weight and type lie
+with the goth, emo teenagers of the pokemon world: the dark pokemon.
+They tend to have very low levels of baseline happiness, even though
+they have an average weight that is around the mean. Dragons and steel
+type pokemon also tend to be very miserable. Now, if I was a dragon, I
+would be very happy, what with the massive power, dens, and treasure.
+However, hoarding generally
+
+``` r
+#Create a dataframe with generations, types, and weights with the average by type.
+typeGenWeight<- plotFF %>%
+  group_by(pokeGen, pokeType1) %>%
+  summarise(Weight = mean(pokeWeight))
+```
+
+    ## `summarise()` has grouped output by 'pokeGen'. You can override using the `.groups` argument.
+
+``` r
+#Summerise pokemon Happiness by generations.
+typeGenHap <- plotFF %>%
+  group_by(pokeGen, pokeType1) %>%
+  summarise(Happiness = mean(pokeHappy))
+```
+
+    ## `summarise()` has grouped output by 'pokeGen'. You can override using the `.groups` argument.
+
+``` r
+#
+typeBreak<-merge(typeGenWeight, typeGenHap, by=c('pokeGen', 'pokeType1'), all=TRUE)
+```
+
+# Conclusions
+
+This Pokemon Vignette uses several built in functions and tidyverse
+packages to expose the increasing amount of sadness and heavier weights
+occuring in the Pokemon Universe over time with visuals, graphs, and
+tables. This is cutting edge reasearch into newly arising problems in
+pokemon culture. Future research questions include: \* Is this increase
+in sadness a response to colonial expansion to these new areas in new
+generations? Or are we just discovering more diverse colony types in
+harser parts of the world? \* Are these pokemon who are heavy and less
+happy found in more rural areas? \* Where are the best places to put
+pokemon intervention centers.
