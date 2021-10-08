@@ -28,11 +28,12 @@ Mandy Liesch
         -   [mergedFinal(): Merge the type and generation
             datasets](#mergedfinal-merge-the-type-and-generation-datasets)
 -   [Data Analysis](#data-analysis)
-    -   [Preparation](#preparation)
-        -   [Run the Functions](#run-the-functions)
+    -   [Run the Functions](#run-the-functions)
     -   [Are Fat Pokemon Happy?](#are-fat-pokemon-happy)
-    -   [Pokemon getting Heavier Over
-        Time](#pokemon-getting-heavier-over-time)
+    -   [Pokemon Weight and Happiness Over
+        Time](#pokemon-weight-and-happiness-over-time)
+    -   [Does Type Influence Happiness and
+        Weight?](#does-type-influence-happiness-and-weight)
 -   [Conclusions](#conclusions)
 
 # Required Packages
@@ -513,9 +514,7 @@ mergedFinal<-function(typePrep, genPrep){
 
 # Data Analysis
 
-## Preparation
-
-### Run the Functions
+## Run the Functions
 
 ``` r
 #Running the types function for the user determined function (want 'all'). Specify any of the types that the user wishes is possible (there are 20, for reference).
@@ -568,7 +567,7 @@ plot1 <- ggplot(plotFF, aes(BMI,
 plot1
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-17-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-37-1.png)<!-- -->
 
 It appears that there is a slight negative correlation to baseline
 happiness to BMI, however, it appears most pokemon are pretty happy,
@@ -597,7 +596,9 @@ plot2 <- ggplot(plotFF, aes(pokeWeight,
 plot2
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-18-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-38-1.png)<!-- -->
+
+\#\#Are Heavy Pokemon Powerful?
 
 Now, we need to look at the overall statistics a pokemon has. This is
 done by summing all of the attack, defense, speed, and hitpoints
@@ -639,7 +640,7 @@ plot3 <- ggplot(plotFF, aes(SUM, pokeWeight, color=SumAttack)) +
 plot3
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-20-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-40-1.png)<!-- -->
 
 Like in people, big people know they are being used to lift heavy stuff,
 and pull tall objects off the shelf. These high attack power and higher
@@ -648,7 +649,7 @@ manual labor jobs, so the fact that heavier pokemon tend to be less
 happy makes sense. Power is a heavy responsibility and weight these
 heavy pokemon disproportionately wear.
 
-## Pokemon getting Heavier Over Time
+## Pokemon Weight and Happiness Over Time
 
 So, we have data over multiple generations, showing the avereage weight
 of pokemon over time. This data can be summerized into categories and
@@ -676,25 +677,110 @@ and happy, but the wear of Pokesociety is starting to get to the newer
 pokemon.
 
 ``` r
-#Create a new table with the pokemon weight and happiness over timme.
+#Create a new table with the pokemon weight and happiness over time.
 knitr::kable(
   fullbreak,
-  caption=paste("Pokemon Weight and Happiness over Generations")
+  caption=paste("Pokemon Weight and Happiness over Generations"),
+  col.names = c("Generation",
+                           "Weight",
+                           "Happiness"),
+  digits=2
 )
 ```
 
-| pokeGen         |    Weight | Happiness |
-|:----------------|----------:|----------:|
-| generation-i    |  459.5166 |  69.73510 |
-| generation-ii   |  491.0500 |  66.10000 |
-| generation-iii  |  671.2463 |  62.42537 |
-| generation-iv   |  718.0865 |  68.36538 |
-| generation-v    |  524.6242 |  65.03356 |
-| generation-vi   |  532.6324 |  66.25000 |
-| generation-vii  | 1046.4512 |  51.21951 |
-| generation-viii |  747.6867 |  48.67470 |
+| Generation      |  Weight | Happiness |
+|:----------------|--------:|----------:|
+| generation-i    |  459.52 |     69.74 |
+| generation-ii   |  491.05 |     66.10 |
+| generation-iii  |  671.25 |     62.43 |
+| generation-iv   |  718.09 |     68.37 |
+| generation-v    |  524.62 |     65.03 |
+| generation-vi   |  532.63 |     66.25 |
+| generation-vii  | 1046.45 |     51.22 |
+| generation-viii |  747.69 |     48.67 |
 
 Pokemon Weight and Happiness over Generations
+
+## Does Type Influence Happiness and Weight?
+
+Looking at generational and weight trends, it is possible to look at
+trends by primary pokemon type.
+
+``` r
+typeWeight<- plotFF %>%
+  group_by(pokeType1) %>%
+  summarise(Weight = mean(pokeWeight))
+
+typeHappy<- plotFF %>%
+  group_by(pokeType1) %>%
+  summarise(Happiness = mean(pokeHappy))
+
+typeMerged<-merge(typeWeight, typeHappy, by= 'pokeType1', all=TRUE)
+
+
+knitr::kable(
+  typeMerged,
+  caption=paste("Pokemon Weight and Happiness over Different Types"),
+  col.names = c("Primary Type",
+                           "Weight",
+                           "Happiness"),
+  digits=2
+)
+```
+
+| Primary Type |  Weight | Happiness |
+|:-------------|--------:|----------:|
+| bug          |  330.24 |     66.35 |
+| dark         |  618.78 |     42.36 |
+| dragon       | 1024.45 |     43.39 |
+| electric     |  426.15 |     63.09 |
+| fairy        |  212.40 |     75.00 |
+| fighting     |  558.56 |     65.00 |
+| fire         |  610.50 |     65.54 |
+| flying       |  339.67 |     56.67 |
+| ghost        |  414.52 |     57.41 |
+| grass        |  330.21 |     65.65 |
+| ground       | 1248.09 |     66.18 |
+| ice          | 1214.44 |     62.59 |
+| normal       |  441.78 |     68.56 |
+| poison       |  621.91 |     64.86 |
+| psychic      |  359.61 |     65.74 |
+| rock         | 1236.73 |     61.77 |
+| steel        | 2105.24 |     46.55 |
+| water        |  530.09 |     66.46 |
+
+Pokemon Weight and Happiness over Different Types
+
+The biggest discrepancy between the correlation of weight and type lie
+with the goth, emo teenagers of the pokemon world: the dark pokemon.
+They tend to have very low levels of baseline happiness, even though
+they have an average weight that is around the mean. Dragons and steel
+type pokemon also tend to be very miserable. Now, if I was a dragon, I
+would be very happy, what with the massive power, dens, and treasure.
+However, hoarding generally
+
+``` r
+#Create a dataframe with generations, types, and weights with the average by type.
+typeGenWeight<- plotFF %>%
+  group_by(pokeGen, pokeType1) %>%
+  summarise(Weight = mean(pokeWeight))
+```
+
+    ## `summarise()` has grouped output by 'pokeGen'. You can override using the `.groups` argument.
+
+``` r
+#Summerise pokemon Happiness by generations.
+typeGenHap <- plotFF %>%
+  group_by(pokeGen, pokeType1) %>%
+  summarise(Happiness = mean(pokeHappy))
+```
+
+    ## `summarise()` has grouped output by 'pokeGen'. You can override using the `.groups` argument.
+
+``` r
+#
+typeBreak<-merge(typeGenWeight, typeGenHap, by=c('pokeGen', 'pokeType1'), all=TRUE)
+```
 
 # Conclusions
 

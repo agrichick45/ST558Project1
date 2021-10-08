@@ -13,7 +13,7 @@ R is a super versatile software, and we are allowed to write many different func
 *[`jsonlinte` Package](https://cran.r-project.org/web/packages/jsonlite/index.html): is a package that interprets and parses the json data output of the APIs.
 
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, warning=FALSE}
 #load the required packages
 require("httr")
 require("jsonlite")
@@ -467,9 +467,7 @@ mergedFinal<-function(typePrep, genPrep){
 
 # Data Analysis
 
-## Preparation
-
-### Run the Functions
+## Run the Functions
 
 ```{r}
 #Running the types function for the user determined function (want 'all'). Specify any of the types that the user wishes is possible (there are 20, for reference).
@@ -534,6 +532,8 @@ plot2
 
 ```
 
+##Are Heavy Pokemon Powerful?
+
 Now, we need to look at the overall statistics a pokemon has. This is done by summing all of the attack, defense, speed, and hitpoints
 
 ```{r}
@@ -572,7 +572,7 @@ plot3
 
 Like in people, big people know they are being used to lift heavy stuff, and pull tall objects off the shelf. These high attack power and higher stat pokemon are likely used in Poke-national defense, and super hard, manual labor jobs, so the fact that heavier pokemon tend to be less happy makes sense. Power is a heavy responsibility and weight these heavy pokemon disproportionately wear.
 
-## Pokemon getting Heavier Over Time
+## Pokemon Weight and Happiness Over Time
 
 So, we have data over multiple generations, showing the avereage weight of pokemon over time. This data can be summerized into categories and shown in a table. 
 
@@ -596,11 +596,59 @@ fullbreak<-merge(breakdown, breakdown1, by='pokeGen')
 It appears that, like American Society, pokemon are getting heavier and sadder over time as well, peaking in generation  7, with sadness continuing to decline over time substatially. Generation 4 was both fat, and happy, but the wear of Pokesociety is starting to get to the newer pokemon.  
 
 ```{r}
-#Create a new table with the pokemon weight and happiness over timme.
+#Create a new table with the pokemon weight and happiness over time.
 knitr::kable(
   fullbreak,
-  caption=paste("Pokemon Weight and Happiness over Generations")
+  caption=paste("Pokemon Weight and Happiness over Generations"),
+  col.names = c("Generation",
+                           "Weight",
+                           "Happiness"),
+  digits=2
 )
+```
+
+## Does Type Influence Happiness and Weight?
+
+Looking at generational and weight trends, it is possible to look at trends by primary pokemon type.
+```{r}
+
+typeWeight<- plotFF %>%
+  group_by(pokeType1) %>%
+  summarise(Weight = mean(pokeWeight))
+
+typeHappy<- plotFF %>%
+  group_by(pokeType1) %>%
+  summarise(Happiness = mean(pokeHappy))
+
+typeMerged<-merge(typeWeight, typeHappy, by= 'pokeType1', all=TRUE)
+
+
+knitr::kable(
+  typeMerged,
+  caption=paste("Pokemon Weight and Happiness over Different Types"),
+  col.names = c("Primary Type",
+                           "Weight",
+                           "Happiness"),
+  digits=2
+)
+```
+
+The biggest discrepancy between the correlation of weight and type lie with the goth, emo teenagers of the pokemon world: the dark pokemon. They tend to have very low levels of baseline happiness, even though they have an average weight that is around the mean. Dragons and steel type pokemon also tend to be very miserable. Now, if I was a dragon, I would be very happy, what with the massive power, dens, and treasure. However, hoarding generally 
+
+```{r}
+#Create a dataframe with generations, types, and weights with the average by type.
+typeGenWeight<- plotFF %>%
+  group_by(pokeGen, pokeType1) %>%
+  summarise(Weight = mean(pokeWeight))
+
+#Summerise pokemon Happiness by generations.
+typeGenHap <- plotFF %>%
+  group_by(pokeGen, pokeType1) %>%
+  summarise(Happiness = mean(pokeHappy))
+
+#
+typeBreak<-merge(typeGenWeight, typeGenHap, by=c('pokeGen', 'pokeType1'), all=TRUE)
+
 ```
 
 # Conclusions
