@@ -654,10 +654,39 @@ typeGenHap <- plotFF %>%
   group_by(pokeGen, pokeType1) %>%
   summarise(Happiness = mean(pokeHappy))
 
-#
+#Merge the two files together so we can graph
 typeBreak<-merge(typeGenWeight, typeGenHap, by=c('pokeGen', 'pokeType1'), all=TRUE)
+```
+
+Since Dark, Dragon, and Steel types are the saddest pokemon, we are going to look at the trends in weight and time for these three types, looking at the number of each of these types in a generation, and how this corresponds to sadness.
+
+
+```{r}
+#select the happiest and saddest pokemon types to graph the change over generations.
+graphBreak<- typeBreak %>%
+  filter(pokeType1 == "dark" |pokeType1 == "dragon"| pokeType1=="steel"
+         |pokeType1=='fairy'|pokeType1=='normal'|pokeType1=='water')
+
+#Create a plot with the six types selected above.
+plot4<-ggplot(data=graphBreak, aes(x=pokeGen, y=Happiness, group=pokeType1,
+                                   colour=pokeType1)) +
+  #customize the line length and point size
+  geom_line(size=2)+
+  geom_point(size=2)+
+  #scale the generation
+  scale_x_discrete("Pokemon Generation") + 
+  # Add a title.
+  ggtitle("Pokemon Happiness and Type over Time")+
+  #rotate the legend
+  theme(axis.text.x = element_text(angle = 90))+
+  #add a new legend label.
+  labs(color='Primary Type') 
+
+plot4
 
 ```
+
+However, looking at the overall data of even the happiest type of pokemon, it is clear that there is a strong decline in happiness, even for the vibrant fairy type pokemon. This shows, that even the optimists are struggling now, where they never had before.
 
 # Conclusions
 

@@ -52,6 +52,21 @@ Package](https://cran.r-project.org/web/packages/jsonlite/index.html):
 is a package that interprets and parses the json data output of the
 APIs.
 
+\*[`tidyverse` Package](https://www.tidyverse.org/): is a comprehensive
+data management package, it includes functions to clean, manipulate, and
+process data, and is one of the flagships of data science in R.
+
+\*[`RCurl`
+Package](https://cran.r-project.org/web/packages/RCurl/index.html): Like
+httr, RCurl provides functions to allow one to compose general HTTP
+requests and work with APIs.
+
+\*[`ggplot` Package](https://ggplot2.tidyverse.org/): a comprehensive
+graphing package from the tidyverse.
+
+\*[`knitr` Package](https://www.r-project.org/nosvn/pandoc/knitr.html):
+A package that manipulates data to control visual output.
+
 # Function Creation
 
 ## Type Fuctions
@@ -567,7 +582,7 @@ plot1 <- ggplot(plotFF, aes(BMI,
 plot1
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-37-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-17-1.png)<!-- -->
 
 It appears that there is a slight negative correlation to baseline
 happiness to BMI, however, it appears most pokemon are pretty happy,
@@ -596,7 +611,7 @@ plot2 <- ggplot(plotFF, aes(pokeWeight,
 plot2
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-38-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-18-1.png)<!-- -->
 
 \#\#Are Heavy Pokemon Powerful?
 
@@ -640,7 +655,7 @@ plot3 <- ggplot(plotFF, aes(SUM, pokeWeight, color=SumAttack)) +
 plot3
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-40-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-20-1.png)<!-- -->
 
 Like in people, big people know they are being used to lift heavy stuff,
 and pull tall objects off the shelf. These high attack power and higher
@@ -778,9 +793,45 @@ typeGenHap <- plotFF %>%
     ## `summarise()` has grouped output by 'pokeGen'. You can override using the `.groups` argument.
 
 ``` r
-#
+#Merge the two files together so we can graph
 typeBreak<-merge(typeGenWeight, typeGenHap, by=c('pokeGen', 'pokeType1'), all=TRUE)
 ```
+
+Since Dark, Dragon, and Steel types are the saddest pokemon, we are
+going to look at the trends in weight and time for these three types,
+looking at the number of each of these types in a generation, and how
+this corresponds to sadness.
+
+``` r
+#select the happiest and saddest pokemon types to graph the change over generations.
+graphBreak<- typeBreak %>%
+  filter(pokeType1 == "dark" |pokeType1 == "dragon"| pokeType1=="steel"
+         |pokeType1=='fairy'|pokeType1=='normal'|pokeType1=='water')
+
+#Create a plot with the six types selected above.
+plot4<-ggplot(data=graphBreak, aes(x=pokeGen, y=Happiness, group=pokeType1,
+                                   colour=pokeType1)) +
+  #customize the line length and point size
+  geom_line(size=2)+
+  geom_point(size=2)+
+  #scale the generation
+  scale_x_discrete("Pokemon Generation") + 
+  # Add a title.
+  ggtitle("Pokemon Happiness and Type over Time")+
+  #rotate the legend
+  theme(axis.text.x = element_text(angle = 90))+
+  #add a new legend label.
+  labs(color='Primary Type') 
+
+plot4
+```
+
+![](README_files/figure-gfm/unnamed-chunk-25-1.png)<!-- -->
+
+However, looking at the overall data of even the happiest type of
+pokemon, it is clear that there is a strong decline in happiness, even
+for the vibrant fairy type pokemon. This shows, that even the optimists
+are struggling now, where they never had before.
 
 # Conclusions
 
