@@ -31,6 +31,8 @@ Mandy Liesch
     -   [Run the Functions](#run-the-functions)
     -   [Popular Pokemon Types](#popular-pokemon-types)
     -   [Are Fat Pokemon Happy?](#are-fat-pokemon-happy)
+    -   [A Pokemon Regression Tree
+        Exploration](#a-pokemon-regression-tree-exploration)
     -   [Pokemon Weight and Happiness Over
         Time](#pokemon-weight-and-happiness-over-time)
     -   [Does Type Influence Happiness and
@@ -67,6 +69,10 @@ graphing package from the tidyverse.
 
 \*[`knitr` Package](https://www.r-project.org/nosvn/pandoc/knitr.html):
 A package that manipulates data to control visual output.
+
+\*[`tree`
+Package](https://cran.r-project.org/web/packages/tree/tree.pdf): A
+package that runs regression and classification trees.
 
 # Function Creation
 
@@ -540,6 +546,7 @@ genAllFrame<-genOut('all')
 #Run the mergedFinal function to putt together the pokemon id and name, and 14 other desired variables. 
 mergedFF<-mergedFinal(typeAllFrame, genAllFrame)
 
+#Remove the columns that don't have primary types from analysis.
 mergedFF<-mergedFF[!is.na(mergedFF$pokeType1),]
 ```
 
@@ -638,9 +645,11 @@ one miserable pokemon (Happiness of 0, with a BMI of nearly 10,000), so
 we filter out his data, as it is an outlier.
 
 ``` r
+#Calculate the BMI of pokemon
 mergedFF<- mergedFF %>%
   mutate(BMI = pokeWeight/(pokeHeight*pokeHeight))
 
+#Filter out the pokemon with the crazy high BMI.
 plotFF<- mergedFF %>%
   filter(BMI < 50)
 ```
@@ -747,6 +756,146 @@ stat pokemon are likely used in Poke-national defense, and super hard,
 manual labor jobs, so the fact that heavier pokemon tend to be less
 happy makes sense. Power is a heavy responsibility and weight these
 heavy pokemon disproportionately wear.
+
+## A Pokemon Regression Tree Exploration
+
+There are several different machine learning algorithms that can be used
+to explore data. In this case, I want to change pokemon happiness into
+categorical factor values of high, and low, with a value of 65 (near
+mean happiness) as the cutoff.
+
+``` r
+#attach the cleaned plot dataframe for analysis
+attach(plotFF)
+```
+
+    ## The following objects are masked from plotFF (pos = 3):
+    ## 
+    ##     attack, BMI, defense, hp, pokeCapture, pokeGen, pokeGrowth, pokeHappy,
+    ##     pokeHeight, pokeid, pokeName, pokeType1, pokeType2, pokeWeight, specialattack,
+    ##     specialdefense, speed, SUM, SumAttack
+
+    ## The following objects are masked from plotFF (pos = 5):
+    ## 
+    ##     attack, BMI, defense, hp, pokeCapture, pokeGen, pokeGrowth, pokeHappy,
+    ##     pokeHeight, pokeid, pokeName, pokeType1, pokeType2, pokeWeight, specialattack,
+    ##     specialdefense, speed, SUM, SumAttack
+
+    ## The following objects are masked from plotFF (pos = 6):
+    ## 
+    ##     attack, BMI, defense, hp, pokeCapture, pokeGen, pokeGrowth, pokeHappy,
+    ##     pokeHeight, pokeid, pokeName, pokeType1, pokeType2, pokeWeight, specialattack,
+    ##     specialdefense, speed, SUM, SumAttack
+
+    ## The following objects are masked from plotFF (pos = 7):
+    ## 
+    ##     attack, BMI, defense, hp, pokeCapture, pokeGen, pokeGrowth, pokeHappy,
+    ##     pokeHeight, pokeid, pokeName, pokeType1, pokeType2, pokeWeight, specialattack,
+    ##     specialdefense, speed, SUM, SumAttack
+
+``` r
+#Create a factor variable for sad and happy pokemon, with pokemon with happiness less than 65 as sad. 
+High=factor(ifelse(pokeHappy<=65,"Sad","Happy"))
+#remove all variables from analysis.
+plotFFOut<-plotFF[3:18]
+#Add the new variable to the dataframe.
+plotFFHigh=data.frame(plotFFOut,High)
+#Return the initial number of categorization nodes
+tree.pokemon=tree(High~.-pokeHappy,plotFFHigh)
+```
+
+    ## Warning in tree(High ~ . - pokeHappy, plotFFHigh): NAs introduced by coercion
+
+``` r
+#put out the summary variables of the initial tree function.
+summary(tree.pokemon)
+```
+
+    ## 
+    ## Classification tree:
+    ## tree(formula = High ~ . - pokeHappy, data = plotFFHigh)
+    ## Variables actually used in tree construction:
+    ## [1] "SUM"            "specialattack"  "BMI"            "specialdefense" "pokeCapture"   
+    ## [6] "attack"         "pokeWeight"     "speed"          "pokeHeight"    
+    ## Number of terminal nodes:  20 
+    ## Residual mean deviance:  0.567 = 230.8 / 407 
+    ## Misclassification error rate: 0.1171 = 50 / 427
+
+There appears to be 20 different terminal nodes, which is a very
+complicated tree to get happy and sad values. So, to get a final
+product, we need to trim the tree. Looking at the plots calculated with
+cross validation, a trimmed tree with 5 nodes is best.
+
+``` r
+#run a cross validation of the pokemon data
+cv.pokemon=cv.tree(tree.pokemon,FUN=prune.misclass)
+```
+
+    ## Warning in tree(model = m[rand != i, , drop = FALSE]): NAs introduced by coercion
+
+    ## Warning in pred1.tree(tree, tree.matrix(nd)): NAs introduced by coercion
+
+    ## Warning in tree(model = m[rand != i, , drop = FALSE]): NAs introduced by coercion
+
+    ## Warning in pred1.tree(tree, tree.matrix(nd)): NAs introduced by coercion
+
+    ## Warning in tree(model = m[rand != i, , drop = FALSE]): NAs introduced by coercion
+
+    ## Warning in pred1.tree(tree, tree.matrix(nd)): NAs introduced by coercion
+
+    ## Warning in tree(model = m[rand != i, , drop = FALSE]): NAs introduced by coercion
+
+    ## Warning in pred1.tree(tree, tree.matrix(nd)): NAs introduced by coercion
+
+    ## Warning in tree(model = m[rand != i, , drop = FALSE]): NAs introduced by coercion
+
+    ## Warning in pred1.tree(tree, tree.matrix(nd)): NAs introduced by coercion
+
+    ## Warning in tree(model = m[rand != i, , drop = FALSE]): NAs introduced by coercion
+
+    ## Warning in pred1.tree(tree, tree.matrix(nd)): NAs introduced by coercion
+
+    ## Warning in tree(model = m[rand != i, , drop = FALSE]): NAs introduced by coercion
+
+    ## Warning in pred1.tree(tree, tree.matrix(nd)): NAs introduced by coercion
+
+    ## Warning in tree(model = m[rand != i, , drop = FALSE]): NAs introduced by coercion
+
+    ## Warning in pred1.tree(tree, tree.matrix(nd)): NAs introduced by coercion
+
+    ## Warning in tree(model = m[rand != i, , drop = FALSE]): NAs introduced by coercion
+
+    ## Warning in pred1.tree(tree, tree.matrix(nd)): NAs introduced by coercion
+
+    ## Warning in tree(model = m[rand != i, , drop = FALSE]): NAs introduced by coercion
+
+    ## Warning in pred1.tree(tree, tree.matrix(nd)): NAs introduced by coercion
+
+``` r
+#plot the number of trees with the cross validation error.
+plot(cv.pokemon$size,cv.pokemon$dev,type="b")
+```
+
+![](README_files/figure-gfm/unnamed-chunk-23-1.png)<!-- -->
+
+``` r
+#Run the pruning model with the misclassifications
+prune.pokemon=prune.misclass(tree.pokemon,best=5)
+
+#plot the newly trimmed tree
+plot(prune.pokemon)
+
+#with the text values.
+text(prune.pokemon,pretty=0)
+```
+
+![](README_files/figure-gfm/unnamed-chunk-23-2.png)<!-- -->
+
+This simplified tree shows that the less powerful pokemon (with SUM of
+all stats less than 568.9), tend to be happier. If pokemon have high sum
+of stats, only those have a low weight (less than 463 units), tend to
+have high happiness. So, overall, the regression tree supports the
+graphs looking at weight and power as a negative indicator.
 
 ## Pokemon Weight and Happiness Over Time
 
@@ -910,7 +1059,7 @@ plot4<-ggplot(data=graphBreak, aes(x=pokeGen, y=Happiness, group=pokeType1,
 plot4
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-26-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-28-1.png)<!-- -->
 
 However, looking at the overall data of even the happiest type of
 pokemon, it is clear that there is a strong decline in happiness, even
