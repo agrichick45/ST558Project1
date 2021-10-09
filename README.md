@@ -675,7 +675,7 @@ plot1 <- ggplot(plotFF, aes(BMI,
 plot1
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-18-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-19-1.png)<!-- -->
 
 It appears that there is a slight negative correlation to baseline
 happiness to BMI, however, it appears most pokemon are pretty happy,
@@ -704,7 +704,7 @@ plot2 <- ggplot(plotFF, aes(pokeWeight,
 plot2
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-19-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-20-1.png)<!-- -->
 
 \#\#Are Heavy Pokemon Powerful?
 
@@ -748,7 +748,7 @@ plot3 <- ggplot(plotFF, aes(SUM, pokeWeight, color=SumAttack)) +
 plot3
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-21-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-22-1.png)<!-- -->
 
 Like in people, big people know they are being used to lift heavy stuff,
 and pull tall objects off the shelf. These high attack power and higher
@@ -767,33 +767,6 @@ mean happiness) as the cutoff.
 ``` r
 #attach the cleaned plot dataframe for analysis
 attach(plotFF)
-```
-
-    ## The following objects are masked from plotFF (pos = 3):
-    ## 
-    ##     attack, BMI, defense, hp, pokeCapture, pokeGen, pokeGrowth, pokeHappy,
-    ##     pokeHeight, pokeid, pokeName, pokeType1, pokeType2, pokeWeight, specialattack,
-    ##     specialdefense, speed, SUM, SumAttack
-
-    ## The following objects are masked from plotFF (pos = 5):
-    ## 
-    ##     attack, BMI, defense, hp, pokeCapture, pokeGen, pokeGrowth, pokeHappy,
-    ##     pokeHeight, pokeid, pokeName, pokeType1, pokeType2, pokeWeight, specialattack,
-    ##     specialdefense, speed, SUM, SumAttack
-
-    ## The following objects are masked from plotFF (pos = 6):
-    ## 
-    ##     attack, BMI, defense, hp, pokeCapture, pokeGen, pokeGrowth, pokeHappy,
-    ##     pokeHeight, pokeid, pokeName, pokeType1, pokeType2, pokeWeight, specialattack,
-    ##     specialdefense, speed, SUM, SumAttack
-
-    ## The following objects are masked from plotFF (pos = 7):
-    ## 
-    ##     attack, BMI, defense, hp, pokeCapture, pokeGen, pokeGrowth, pokeHappy,
-    ##     pokeHeight, pokeid, pokeName, pokeType1, pokeType2, pokeWeight, specialattack,
-    ##     specialdefense, speed, SUM, SumAttack
-
-``` r
 #Create a factor variable for sad and happy pokemon, with pokemon with happiness less than 65 as sad. 
 High=factor(ifelse(pokeHappy<=65,"Sad","Happy"))
 #remove all variables from analysis.
@@ -802,11 +775,6 @@ plotFFOut<-plotFF[3:18]
 plotFFHigh=data.frame(plotFFOut,High)
 #Return the initial number of categorization nodes
 tree.pokemon=tree(High~.-pokeHappy,plotFFHigh)
-```
-
-    ## Warning in tree(High ~ . - pokeHappy, plotFFHigh): NAs introduced by coercion
-
-``` r
 #put out the summary variables of the initial tree function.
 summary(tree.pokemon)
 ```
@@ -829,54 +797,11 @@ cross validation, a trimmed tree with 5 nodes is best.
 ``` r
 #run a cross validation of the pokemon data
 cv.pokemon=cv.tree(tree.pokemon,FUN=prune.misclass)
-```
-
-    ## Warning in tree(model = m[rand != i, , drop = FALSE]): NAs introduced by coercion
-
-    ## Warning in pred1.tree(tree, tree.matrix(nd)): NAs introduced by coercion
-
-    ## Warning in tree(model = m[rand != i, , drop = FALSE]): NAs introduced by coercion
-
-    ## Warning in pred1.tree(tree, tree.matrix(nd)): NAs introduced by coercion
-
-    ## Warning in tree(model = m[rand != i, , drop = FALSE]): NAs introduced by coercion
-
-    ## Warning in pred1.tree(tree, tree.matrix(nd)): NAs introduced by coercion
-
-    ## Warning in tree(model = m[rand != i, , drop = FALSE]): NAs introduced by coercion
-
-    ## Warning in pred1.tree(tree, tree.matrix(nd)): NAs introduced by coercion
-
-    ## Warning in tree(model = m[rand != i, , drop = FALSE]): NAs introduced by coercion
-
-    ## Warning in pred1.tree(tree, tree.matrix(nd)): NAs introduced by coercion
-
-    ## Warning in tree(model = m[rand != i, , drop = FALSE]): NAs introduced by coercion
-
-    ## Warning in pred1.tree(tree, tree.matrix(nd)): NAs introduced by coercion
-
-    ## Warning in tree(model = m[rand != i, , drop = FALSE]): NAs introduced by coercion
-
-    ## Warning in pred1.tree(tree, tree.matrix(nd)): NAs introduced by coercion
-
-    ## Warning in tree(model = m[rand != i, , drop = FALSE]): NAs introduced by coercion
-
-    ## Warning in pred1.tree(tree, tree.matrix(nd)): NAs introduced by coercion
-
-    ## Warning in tree(model = m[rand != i, , drop = FALSE]): NAs introduced by coercion
-
-    ## Warning in pred1.tree(tree, tree.matrix(nd)): NAs introduced by coercion
-
-    ## Warning in tree(model = m[rand != i, , drop = FALSE]): NAs introduced by coercion
-
-    ## Warning in pred1.tree(tree, tree.matrix(nd)): NAs introduced by coercion
-
-``` r
 #plot the number of trees with the cross validation error.
 plot(cv.pokemon$size,cv.pokemon$dev,type="b")
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-23-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-24-1.png)<!-- -->
 
 ``` r
 #Run the pruning model with the misclassifications
@@ -889,7 +814,7 @@ plot(prune.pokemon)
 text(prune.pokemon,pretty=0)
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-23-2.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-24-2.png)<!-- -->
 
 This simplified tree shows that the less powerful pokemon (with SUM of
 all stats less than 568.9), tend to be happier. If pokemon have high sum
@@ -1012,20 +937,12 @@ However, hoarding generally
 typeGenWeight<- plotFF %>%
   group_by(pokeGen, pokeType1) %>%
   summarise(Weight = mean(pokeWeight))
-```
 
-    ## `summarise()` has grouped output by 'pokeGen'. You can override using the `.groups` argument.
-
-``` r
 #Summerise pokemon Happiness by generations.
 typeGenHap <- plotFF %>%
   group_by(pokeGen, pokeType1) %>%
   summarise(Happiness = mean(pokeHappy))
-```
 
-    ## `summarise()` has grouped output by 'pokeGen'. You can override using the `.groups` argument.
-
-``` r
 #Merge the two files together so we can graph
 typeBreak<-merge(typeGenWeight, typeGenHap, by=c('pokeGen', 'pokeType1'), all=TRUE)
 ```
@@ -1059,7 +976,7 @@ plot4<-ggplot(data=graphBreak, aes(x=pokeGen, y=Happiness, group=pokeType1,
 plot4
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-28-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-29-1.png)<!-- -->
 
 However, looking at the overall data of even the happiest type of
 pokemon, it is clear that there is a strong decline in happiness, even
